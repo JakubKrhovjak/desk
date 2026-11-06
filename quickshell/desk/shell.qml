@@ -36,13 +36,13 @@ ShellRoot {
         }
     }
 
-    Component.onCompleted: Quickshell.execDetached([`${Quickshell.env("HOME")}/.config/desk/toolbox-tray.sh`])
+    Component.onCompleted: Quickshell.execDetached([`${ShellEnv.deskDir}/toolbox-tray.sh`])
 
     // Ikony Simpleton v barvách schématu; nové barvy se v běžícím shellu ukážou až po jeho restartu
     FileView {
         path: `${Quickshell.env("HOME")}/.local/state/caelestia/scheme.json`
         watchChanges: true
-        onFileChanged: Quickshell.execDetached([`${Quickshell.env("HOME")}/.config/desk/recolor-icons.sh`])
+        onFileChanged: Quickshell.execDetached([`${ShellEnv.deskDir}/recolor-icons.sh`])
     }
 
     Binding {
@@ -126,7 +126,7 @@ ShellRoot {
     WindowSwitcher {
         focusedMonitorOnly: true
         ignoredClasses: ["jetbrains-toolbox"]
-        minimizedWorkspace: "special:minimized"
+        minimizedWorkspace: ShellEnv.minimizedWorkspace
     }
     IdleMonitors {
         lock: lock

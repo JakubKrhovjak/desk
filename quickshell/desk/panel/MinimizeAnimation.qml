@@ -18,16 +18,12 @@ Scope {
     property var request: null
     property var cache: ({})
 
-    function strip(address: string): string {
-        return address.replace(/^0x/, "");
-    }
-
     function findToplevel(address: string): var {
-        return Hypr.toplevels.values.find(t => strip(t.address) === strip(address));
+        return Hypr.toplevels.values.find(t => HyprWindows.address(t.address) === HyprWindows.address(address));
     }
 
     function finishRestore(address: string): void {
-        Quickshell.execDetached(["hyprctl", "eval", `finish_restore("${address}")`]);
+        HyprWindows.run([`finish_restore("${address}")`]);
     }
 
     IpcHandler {
@@ -49,7 +45,7 @@ Scope {
 
         // Bez uloženého snímku (třeba po restartu shellu) se okno vrátí hned, bez animace
         function restore(address: string): void {
-            const saved = root.cache[root.strip(address)];
+            const saved = root.cache[HyprWindows.address(address)];
             const toplevel = root.findToplevel(address);
             if (saved && toplevel)
                 root.request = Object.assign({}, saved, { mode: "restore", address, toplevel });
@@ -82,7 +78,7 @@ Scope {
             function saveSnapshot(view: Item): void {
                 const saved = request;
                 view.grabToImage(image => {
-                    root.cache[root.strip(saved.address)] = {
+                    root.cache[HyprWindows.address(saved.address)] = {
                         image,
                         url: image.url,
                         monitor: saved.monitor,
@@ -92,7 +88,7 @@ Scope {
                         height: saved.height
                     };
                     // Okno se schová a animace začne až s hotovým snímkem, jinak by ho konec animace zahodil
-                    Quickshell.execDetached(["hyprctl", "eval", `finish_minimize("${saved.address}")`]);
+                    HyprWindows.run([`finish_minimize("${saved.address}")`]);
                     shrink.restart();
                 });
             }
@@ -198,7 +194,7 @@ Scope {
                 onFinished: {
                     const address = surface.request?.address;
                     if (address) {
-                        delete root.cache[root.strip(address)];
+                        delete root.cache[HyprWindows.address(address)];
                         root.finishRestore(address);
                     }
                     reveal.restart();

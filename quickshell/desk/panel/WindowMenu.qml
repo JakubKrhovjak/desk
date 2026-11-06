@@ -23,12 +23,11 @@ Scope {
     readonly property ShellScreen targetScreen: Quickshell.screens.find(s => cursorX >= s.x && cursorX < s.x + s.width) ?? Quickshell.screens[0]
 
     readonly property var items: [
-        { label: pinned ? "Unpin from top" : "Pin on top", icon: "push_pin", command: `hl.dispatch(hl.dsp.window.pin({ action = "toggle", window = ${target} }))` },
-        { label: "Minimize", icon: "minimize", command: `hl.dispatch(hl.dsp.focus({ window = ${target} })); minimize_active()` },
-        { label: "Maximize", icon: "crop_square", command: `hl.dispatch(hl.dsp.focus({ window = ${target} })); toggle_maximize()` },
-        { label: "Close", icon: "close", command: `hl.dispatch(hl.dsp.window.close({ window = ${target} }))` }
+        { label: pinned ? "Unpin from top" : "Pin on top", icon: "push_pin", filled: pinned, action: () => HyprWindows.togglePin(address) },
+        { label: "Minimize", icon: "minimize", action: () => HyprWindows.minimize(address) },
+        { label: "Maximize", icon: "crop_square", action: () => HyprWindows.toggleMaximize(address) },
+        { label: "Close", icon: "close", action: () => HyprWindows.close(address) }
     ]
-    readonly property string target: `"address:${address}"`
 
     IpcHandler {
         target: "windowmenu"
@@ -87,41 +86,16 @@ Scope {
                     Repeater {
                         model: root.items
 
-                        StyledRect {
-                            id: row
-
+                        MenuRow {
                             required property var modelData
 
                             width: column.width
-                            implicitHeight: 34
-                            radius: Tokens.rounding.small
-                            color: "transparent"
-
-                            StateLayer {
-                                radius: row.radius
-                                color: Colours.palette.m3onSurface
-                                onClicked: {
-                                    root.open = false;
-                                    Quickshell.execDetached(["hyprctl", "eval", row.modelData.command]);
-                                }
-                            }
-
-                            MaterialIcon {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 8
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: row.modelData.icon
-                                color: Colours.palette.m3onSurface
-                                fill: row.modelData.icon === "push_pin" && root.pinned ? 1 : 0
-                            }
-
-                            StyledText {
-                                anchors.left: parent.left
-                                anchors.leftMargin: 38
-                                anchors.verticalCenter: parent.verticalCenter
-                                text: row.modelData.label
-                                color: Colours.palette.m3onSurface
-                                font: Tokens.font.body.small
+                            label: modelData.label
+                            icon: modelData.icon
+                            iconFilled: modelData.filled ?? false
+                            onActivated: {
+                                root.open = false;
+                                modelData.action();
                             }
                         }
                     }

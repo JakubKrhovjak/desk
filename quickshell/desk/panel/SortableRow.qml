@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Io
 
 // Vodorovný řádek položek SortItem, které jde přeuspořádat tažením myší.
 // Pořadí se ukládá do souboru, takže ho sdílí panely na všech monitorech a přežije restart.
@@ -49,18 +48,6 @@ Item {
             order = next;
     }
 
-    function loadOrder(content: string): void {
-        if (dragging)
-            return;
-        try {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed))
-                order = parsed;
-        } catch (error) {
-            console.warn("desk: invalid panel order file:", error);
-        }
-    }
-
     implicitWidth: shownItems.reduce((sum, item) => sum + item.implicitWidth, 0) + Math.max(0, shownItems.length - 1) * spacing
     implicitHeight: 38
 
@@ -83,18 +70,18 @@ Item {
                 root.dragged = item;
             } else if (root.dragged) {
                 root.dragged = null;
-                orderStore.setText(JSON.stringify(root.sorted.map(item => item.key)));
+                orderStore.save(root.sorted.map(item => item.key));
             }
         }
     }
 
-    FileView {
+    JsonFile {
         id: orderStore
 
         path: root.orderFile
-        watchChanges: true
-        printErrors: false
-        onFileChanged: reload()
-        onLoaded: root.loadOrder(text())
+        onValueLoaded: value => {
+            if (!root.dragging && Array.isArray(value))
+                root.order = value;
+        }
     }
 }

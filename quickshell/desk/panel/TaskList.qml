@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
-import Quickshell.Io
 import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
@@ -19,8 +18,6 @@ Item {
     required property ShellScreen screen
     required property var window
 
-    readonly property string configDir: `${Quickshell.env("HOME")}/.config/desk`
-    readonly property string hiddenWorkspace: "special:minimized"
     readonly property var monitor: Hypr.monitorFor(screen)
 
     property var pins: []
@@ -31,7 +28,7 @@ Item {
     readonly property var appKeys: [...new Set([...pins, ...windowKeys])]
 
     function isMinimized(toplevel: var): bool {
-        return toplevel?.workspace?.name === hiddenWorkspace;
+        return toplevel?.workspace?.name === ShellEnv.minimizedWorkspace;
     }
 
     function entryFor(key: string): var {
@@ -48,38 +45,16 @@ Item {
         return windows.filter(t => appKey(t) === key);
     }
 
-    function run(lines: var): void {
-        Quickshell.execDetached(["hyprctl", "eval", lines.join("; ")]);
-    }
-
-    function target(toplevel: var): string {
-        return `"address:0x${toplevel.address.replace(/^0x/, "")}"`;
-    }
-
-    function raise(toplevel: var): void {
-        run([`hl.dispatch(hl.dsp.focus({ window = ${target(toplevel)} }))`, "hl.dispatch(hl.dsp.window.bring_to_top())"]);
-    }
-
-    function restore(toplevel: var): void {
-        const workspace = toplevel.monitor?.activeWorkspace?.id ?? monitor?.activeWorkspace?.id ?? 1;
-        // Animaci a přesun okna řídí minimize.lua a MinimizeAnimation.qml; přesun a fokus jdou v jednom kroku
-        run([`restore_minimized("0x${toplevel.address.replace(/^0x/, "")}", ${workspace})`]);
-    }
-
-    function close(toplevel: var): void {
-        run([`hl.dispatch(hl.dsp.window.close({ window = ${target(toplevel)} }))`]);
-    }
-
     function show(toplevel: var): void {
         if (isMinimized(toplevel))
-            restore(toplevel);
+            HyprWindows.restoreMinimized(toplevel.address, toplevel.monitor?.activeWorkspace?.id ?? monitor?.activeWorkspace?.id ?? 1);
         else
-            raise(toplevel);
+            HyprWindows.raise(toplevel.address);
     }
 
     // Nové okno se otevře na monitoru, kde se kliklo
     function launch(key: string): void {
-        run([`hl.dispatch(hl.dsp.focus({ monitor = "${screen.name}" }))`]);
+        HyprWindows.focusMonitor(screen.name);
         entryFor(key)?.execute();
     }
 
@@ -95,23 +70,13 @@ Item {
         const group = windowsOf(key);
         const toplevel = group.find(t => t === Hyprland.activeToplevel) ?? group[0];
         if (toplevel)
-            close(toplevel);
+            HyprWindows.close(toplevel.address);
     }
 
     function setPinned(key: string, pinned: bool): void {
         const others = pins.filter(pin => pin !== key);
         pins = pinned ? [...others, key] : others;
-        pinStore.setText(JSON.stringify(pins));
-    }
-
-    function loadPins(content: string): void {
-        try {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed))
-                pins = parsed;
-        } catch (error) {
-            console.warn("desk: invalid pinned apps file:", error);
-        }
+        pinStore.save(pins);
     }
 
     function menuItemsFor(key: string): var {
@@ -121,10 +86,10 @@ Item {
         const windowRows = group.length > 1 ? group.map(t => ({ label: t.title, action: () => show(t) })) : [];
         const launchRows = hasEntry ? [{ label: group.length > 0 ? "New window" : "Launch", action: () => launch(key) }] : [];
         const pinRows = hasEntry || pinned ? [{ label: pinned ? "Unpin from panel" : "Pin to panel", action: () => setPinned(key, !pinned) }] : [];
-        const closeRows = group.length > 0 ? [{ label: group.length > 1 ? "Close all windows" : "Close window", action: () => group.map(t => close(t)) }] : [];
+        const closeRows = group.length > 0 ? [{ label: group.length > 1 ? "Close all windows" : "Close window", action: () => group.map(t => HyprWindows.close(t.address)) }] : [];
         const onTopRows = group.length === 1 ? [{
                 label: group[0].lastIpcObject?.pinned ? "Unpin from top" : "Pin on top",
-                action: () => run([`hl.dispatch(hl.dsp.window.pin({ action = "toggle", window = ${target(group[0])} }))`])
+                action: () => HyprWindows.togglePin(group[0].address)
             }] : [];
         return [...windowRows, ...launchRows, ...pinRows, ...onTopRows, ...closeRows];
     }
@@ -136,14 +101,14 @@ Item {
         menu.visible = true;
     }
 
-    FileView {
+    JsonFile {
         id: pinStore
 
-        path: `${root.configDir}/panel-pins.json`
-        watchChanges: true
-        printErrors: false
-        onFileChanged: reload()
-        onLoaded: root.loadPins(text())
+        path: `${ShellEnv.deskDir}/panel-pins.json`
+        onValueLoaded: value => {
+            if (Array.isArray(value))
+                root.pins = value;
+        }
     }
 
     // Střed ikony aplikace v okně panelu, kam odletí minimalizované okno
@@ -157,7 +122,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        orderFile: `${root.configDir}/panel-tasks-order.json`
+        orderFile: `${ShellEnv.deskDir}/panel-tasks-order.json`
 
         Repeater {
             id: slots
@@ -260,35 +225,14 @@ Item {
                 Repeater {
                     model: menu.items
 
-                    StyledRect {
-                        id: menuRow
-
+                    MenuRow {
                         required property var modelData
 
                         width: menuColumn.width
-                        implicitHeight: 34
-                        radius: Tokens.rounding.small
-                        color: "transparent"
-
-                        StateLayer {
-                            radius: menuRow.radius
-                            color: Colours.palette.m3onSurface
-                            onClicked: {
-                                menu.visible = false;
-                                menuRow.modelData.action();
-                            }
-                        }
-
-                        StyledText {
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: menuRow.modelData.label
-                            elide: Text.ElideRight
-                            color: Colours.palette.m3onSurface
-                            font: Tokens.font.body.small
+                        label: modelData.label
+                        onActivated: {
+                            menu.visible = false;
+                            modelData.action();
                         }
                     }
                 }

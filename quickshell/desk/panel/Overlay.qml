@@ -88,21 +88,12 @@ StyledWindow {
     // Myš přechází mezi dvěma okny (panel a tahle vrstva), proto se zavírá s krátkým zpožděním. Plochy pro hover
     // nesmí během otevírání měnit velikost: Qt pak hlásí odchod myši a dashboard kmitá.
     readonly property bool dashboardTriggered: panelWindow?.dashboardTriggered ?? false
-    readonly property bool dashboardHeld: dashHover.hovered || (panelWindow?.dashboardHeld ?? false)
-
 
     onDashboardTriggeredChanged: {
         if (dashboardTriggered)
             dashOpen.restart();
         else
             dashOpen.stop();
-    }
-
-    onDashboardHeldChanged: {
-        if (dashboardHeld)
-            dashClose.stop();
-        else if (screenState?.dashboard)
-            dashClose.restart();
     }
 
     Timer {
@@ -117,9 +108,10 @@ StyledWindow {
         }
     }
 
-    Timer {
+    HoldTimer {
         id: dashClose
 
+        held: dashHover.hovered || (root.panelWindow?.dashboardHeld ?? false)
         interval: 200
         onTriggered: {
             if (root.screenState?.dashboard) {
@@ -197,7 +189,6 @@ StyledWindow {
     // Wi-Fi a Bluetooth: vyskakovací panel Caelestie, vyjede zpod panelu pod ikonou.
     // Zůstává otevřený, dokud je myš nad ikonou nebo nad ním; dialog s heslem a nastavení se samy nezavírají.
     readonly property string statusHover: panelWindow?.statusHover ?? ""
-    readonly property bool popoutHeld: popoutHover.hovered || popoutContentHover.hovered || statusHover !== ""
 
     // Tlačítko Open settings otevře okno Nexus na stránce daného panelu místo Nexusu vloženého do vyskakovacího panelu
     Connections {
@@ -219,23 +210,14 @@ StyledWindow {
     // volné místo, proto delší zpoždění. Klik ji připne, pak drží do kliknutí jinam.
     property bool sidebarPinned: false
     readonly property bool notificationsHovered: panelWindow?.notificationsHovered ?? false
-    readonly property bool sidebarHeld: notificationsHovered || sidebarBgHover.hovered || sidebarContentHover.hovered
 
     onNotificationsHoveredChanged: {
         if (notificationsHovered && screenState && !hasFullscreen)
             screenState.sidebar = true;
     }
 
-    onSidebarHeldChanged: {
-        if (sidebarHeld)
-            sidebarClose.stop();
-        else
-            sidebarClose.restart();
-    }
-
-    Timer {
-        id: sidebarClose
-
+    HoldTimer {
+        held: root.notificationsHovered || sidebarBgHover.hovered || sidebarContentHover.hovered
         interval: 400
         onTriggered: {
             if (root.screenState && !root.sidebarPinned)
@@ -261,16 +243,8 @@ StyledWindow {
         popouts.hasCurrent = true;
     }
 
-    onPopoutHeldChanged: {
-        if (popoutHeld)
-            popoutClose.stop();
-        else
-            popoutClose.restart();
-    }
-
-    Timer {
-        id: popoutClose
-
+    HoldTimer {
+        held: popoutHover.hovered || popoutContentHover.hovered || root.statusHover !== ""
         interval: 200
         onTriggered: {
             if (!root.popouts.isDetached && root.popouts.currentName !== "wirelesspassword")

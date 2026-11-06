@@ -117,7 +117,7 @@ StyledWindow {
                 id: statusRow
 
                 height: parent.height
-                orderFile: `${Quickshell.env("HOME")}/.config/desk/panel-order.json`
+                orderFile: `${ShellEnv.deskDir}/panel-order.json`
 
                 SortItem {
                     key: "tray"
