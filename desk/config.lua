@@ -20,10 +20,10 @@ local config = {
 
     gaps = {
         windows = 0, -- mezi okny; hranici tvoří jejich modrý okraj
-        edge = 5, -- mezi okny a okrajem plochy
+        edge = 1, -- mezi okny a okrajem plochy; šířka okraje okna (border_size), jinak by modrý okraj vyjel z obrazovky
     },
 
-    window_rounding = 15, -- stejný poloměr mají vnitřní rohy rámečku plochy (panel/ScreenFrame.qml)
+    window_rounding = 15,
 
     classes = {
         terminal = "com.mitchellh.ghostty",

@@ -26,7 +26,9 @@ hl.config({
     plugin = {
         hyprbars = {
             bar_height = bars.height,
-            bar_color = "rgb(" .. scheme.surface .. ")", -- stejná barva jako panel a rámeček plochy
+            -- Stejná barva, krytí a rozmazání jako panel: 40 = panelOpacity 0,25 v panel/PanelStyle.qml
+            bar_color = "rgba(" .. scheme.surface .. "40)",
+            bar_blur = true,
             ["col.text"] = "rgb(" .. scheme.onSurface .. ")",
             bar_text_size = 11,
             bar_text_font = "Google Sans Flex",

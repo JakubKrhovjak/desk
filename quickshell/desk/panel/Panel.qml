@@ -33,10 +33,9 @@ StyledWindow {
     anchors.top: true
     implicitHeight: DeskPanelSettings.panelHeight
 
-    // Stejná plocha jako bubliny pod panelem, takže na něj plynule navazují
     Rectangle {
         anchors.fill: parent
-        color: Colours.tPalette.m3surface
+        color: PanelStyle.panelSurface
     }
 
     // Pravý klik na panel; položky, které pravý klik používají samy (okna, tray), ho sem nepustí

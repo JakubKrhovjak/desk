@@ -149,14 +149,8 @@ StyledWindow {
         }
     }
 
-    StyledRect {
-        anchors.horizontalCenter: dash.horizontalCenter
-        y: dash.y
-        width: dash.width
-        height: dash.height
-        visible: dash.visible
-        opacity: dash.opacity
-        color: Colours.tPalette.m3surface
+    Bubble {
+        target: dash
         bottomLeftRadius: Tokens.rounding.extraLarge
         bottomRightRadius: Tokens.rounding.extraLarge
     }
@@ -187,16 +181,10 @@ StyledWindow {
     }
 
     // Nabídka aplikací: objeví se uprostřed obrazovky jako na Macu
-    StyledRect {
+    Bubble {
         id: launcherBg
 
-        x: launcher.x
-        y: launcher.y
-        width: launcher.width
-        height: launcher.height
-        visible: launcher.visible
-        opacity: launcher.opacity
-        color: Colours.tPalette.m3surface
+        target: launcher
         radius: Tokens.rounding.extraLarge
     }
 
@@ -280,15 +268,10 @@ StyledWindow {
 
     property alias popouts: popoutsWrapper
 
-    StyledRect {
+    Bubble {
         id: popoutBg
 
-        x: popoutsWrapper.x
-        y: popoutsWrapper.y
-        width: popoutsWrapper.width
-        height: popoutsWrapper.height
-        visible: popoutsWrapper.visible
-        color: Colours.tPalette.m3surface
+        target: popoutsWrapper
         radius: popoutsWrapper.isDetached ? Tokens.rounding.extraLarge : 0
         bottomLeftRadius: Tokens.rounding.extraLarge
         bottomRightRadius: Tokens.rounding.extraLarge
@@ -335,15 +318,10 @@ StyledWindow {
     }
 
     // Vyskakovací notifikace vpravo nahoře, jen na hlavním monitoru
-    StyledRect {
+    Bubble {
         id: notifsBg
 
-        x: notifs.x
-        y: notifs.y
-        width: notifs.width
-        height: notifs.height
-        visible: notifs.visible
-        color: Colours.tPalette.m3surface
+        target: notifs
         bottomLeftRadius: Tokens.rounding.extraLarge
     }
 
@@ -366,16 +344,10 @@ StyledWindow {
     }
 
     // Historie notifikací: vyjede zprava po kliknutí na zvonek
-    StyledRect {
+    Bubble {
         id: sidebarBg
 
-        x: sidebar.x
-        y: sidebar.y
-        width: sidebar.width
-        height: sidebar.height
-        visible: sidebar.visible
-        opacity: sidebar.opacity
-        color: Colours.tPalette.m3surface
+        target: sidebar
         topLeftRadius: Tokens.rounding.extraLarge
         bottomLeftRadius: Tokens.rounding.extraLarge
 
@@ -426,16 +398,10 @@ StyledWindow {
         }
     }
 
-    StyledRect {
+    Bubble {
         id: utilitiesBg
 
-        x: utilities.x
-        y: utilities.y
-        width: utilities.width
-        height: utilities.height
-        visible: utilities.visible
-        opacity: utilities.opacity
-        color: Colours.tPalette.m3surface
+        target: utilities
         topLeftRadius: Tokens.rounding.extraLarge
 
         HoverHandler {
@@ -459,16 +425,10 @@ StyledWindow {
     }
 
     // Nabídka vypnutí
-    StyledRect {
+    Bubble {
         id: sessionBg
 
-        x: session.x
-        y: session.y
-        width: session.width
-        height: session.height
-        visible: session.visible
-        opacity: session.opacity
-        color: Colours.tPalette.m3surface
+        target: session
         radius: Tokens.rounding.extraLarge
     }
 
@@ -479,5 +439,18 @@ StyledWindow {
         sidebarVisible: sidebar.visible
 
         anchors.centerIn: parent
+    }
+
+    // Plocha pod vyskakovacím obsahem: kryje se s ním a poloměry si určí každé použití
+    component Bubble: StyledRect {
+        required property Item target
+
+        x: target.x
+        y: target.y
+        width: target.width
+        height: target.height
+        visible: target.visible
+        opacity: target.opacity
+        color: PanelStyle.surface
     }
 }

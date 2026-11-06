@@ -123,7 +123,10 @@ Item {
                     readonly property var group: root.windowsOf(slot.modelData)
                     readonly property bool isActive: group.includes(Hyprland.activeToplevel)
                     readonly property bool allMinimized: group.length > 0 && group.every(t => ShellEnv.isMinimized(t))
-                    readonly property string iconName: PanelApps.entryFor(slot.modelData)?.icon ?? ""
+                    // Okna shellu by jinak dostala zelenou ikonu Quickshellu, která se nepřebarví; mají společnou položku v panelu
+                    readonly property string entryIcon: PanelApps.entryFor(slot.modelData)?.icon ?? ""
+                    readonly property string shellIcon: group.every(t => WindowFactory.isSettingsWindow(t)) ? "preferences-system" : "system-file-manager"
+                    readonly property string iconName: entryIcon === ShellEnv.shellClass ? shellIcon : entryIcon
 
                     implicitWidth: DeskPanelSettings.taskSize
                     implicitHeight: DeskPanelSettings.taskSize

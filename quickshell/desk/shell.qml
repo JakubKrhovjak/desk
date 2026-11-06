@@ -22,17 +22,6 @@ import qs.modules.nexus
 ShellRoot {
     id: root
 
-    // Rámeček plochy na všech monitorech
-    Variants {
-        model: Screens.screens
-
-        ScreenFrame {
-            required property ShellScreen modelData
-
-            screen: modelData
-        }
-    }
-
     // Panel a vše k němu patřící jen na hlavním monitoru
     readonly property string primaryScreen: Screens.screens.some(s => s.name === ShellEnv.mainMonitor) ? ShellEnv.mainMonitor : (Screens.screens[0]?.name ?? "")
 
@@ -89,11 +78,26 @@ ShellRoot {
         onAccepted: path => Quickshell.execDetached(["xdg-open", path])
     }
 
+    // Otevře Files, nebo zvedne jejich už otevřené okno, i minimalizované
+    function showFiles(): void {
+        const existing = Hypr.toplevels.values.find(t => t.wayland?.appId === ShellEnv.shellClass && t.title === filePicker.title);
+        if (existing)
+            HyprWindows.show(existing);
+        else
+            filePicker.open();
+    }
+
     IpcHandler {
         target: "files"
 
         function open(): void {
-            filePicker.open();
+            root.showFiles();
+        }
+
+        // Složka z jiné aplikace: Files jsou výchozí správce složek (desk/files-open.sh)
+        function openPath(path: string): void {
+            filePicker.openPath(path);
+            root.showFiles();
         }
 
         function close(): void {
@@ -125,7 +129,7 @@ ShellRoot {
                 id: panel
 
                 screen: perScreen.modelData
-                onFilesRequested: filePicker.open()
+                onFilesRequested: root.showFiles()
                 onLockRequested: lock.lock.locked = true
                 Component.onCompleted: root.mainPanel = panel
             }

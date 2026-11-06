@@ -48,8 +48,7 @@ hl.env("DESK_MAIN_MONITOR", config.monitors.main)
 hl.env("DESK_DIR", config.dir)
 hl.env("DESK_STATE_DIR", config.state_dir)
 hl.env("DESK_MINIMIZED_WORKSPACE", config.minimized_workspace)
-hl.env("DESK_EDGE_GAP", tostring(config.gaps.edge))
-hl.env("DESK_WINDOW_ROUNDING", tostring(config.window_rounding))
+hl.env("DESK_SHELL_CLASS", config.classes.shell)
 
 -- Vzhled a chování oken
 hl.config({
@@ -59,7 +58,7 @@ hl.config({
         gaps_out = config.gaps.edge,
         border_size = 1,
         resize_on_border = true,
-        -- Modrý okraj odděluje okna od rámečku plochy, proto je stejný i u neaktivních oken
+        -- Modrý okraj odděluje okna od sebe a od tapety, proto je stejný i u neaktivních oken
         col = {
             active_border = "rgba(" .. scheme.primary .. "e6)",
             inactive_border = "rgba(" .. scheme.primary .. "e6)",
@@ -74,7 +73,7 @@ hl.config({
     input = {
         kb_layout = "us,cz",
         kb_variant = ",winkeys-qwerty", -- česká QWERTY s rozmístěním znaků jako na Windows
-        kb_options = "grp:alt_shift_toggle", -- Alt + Shift přepíná rozložení
+        kb_options = "", -- rozložení přepíná Command + ťuknutí na Shift, viz keybinds.lua
         repeat_delay = 250,
         repeat_rate = 35,
         follow_mouse = 2, -- fokus až po kliknutí, jako v Plasmě
@@ -94,7 +93,8 @@ hl.config({
 })
 
 -- Průhledný shell s rozostřením; okna aplikací průhledná nejsou
-hl.layer_rule({ match = { namespace = "caelestia-desk-(panel|overlay|frame)" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ match = { namespace = "caelestia-desk-overlay" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ match = { namespace = "caelestia-desk-panel" }, blur = true, ignore_alpha = 0.2 }) -- pod panelOpacity v panel/PanelStyle.qml
 
 -- Všechna okna plovoucí, jako v Plasmě
 hl.window_rule({ match = { class = ".*" }, float = true })
