@@ -1,7 +1,10 @@
 -- Jediné klávesové zkratky prostředí: Super + šipky, Super + Q, Super + F, Ctrl + Shift + T, Print, Shift + Print, Alt + Shift + F, ťuknutí na Command. Klávesa Command posílá přes keyd Super jen u šipek, F a Q, jinak Ctrl (keyboard.lua).
 
-local snap_gap = 10 -- mezera mezi okny
-local outer_gap = 5 -- mezera mezi okny a okrajem plochy
+local config = require("config")
+local window_memory = require("window-memory")
+
+local snap_gap = config.gaps.windows
+local outer_gap = config.gaps.edge
 local bar_height = require("bars").height
 
 local function snap_rect(side, x, y, w, h)
@@ -122,7 +125,7 @@ end
 
 -- Minimalizace = skrytá speciální plocha. Hyprland ji ale ukáže, jakmile na ní něco dostane fokus,
 -- a na ukázané ploše by minimalizace nic neschovala, proto ji hned zase skrývá.
-local minimized_workspace = "special:minimized"
+local minimized_workspace = config.minimized_workspace
 
 local function hide_minimized()
     for _, mon in ipairs(hl.get_monitors()) do
@@ -143,7 +146,7 @@ local function focus_next_window()
         local mon = win.monitor
         local visible = win.mapped and not win.hidden and mon and win.workspace and mon.active_workspace
             and win.workspace.id == mon.active_workspace.id
-        if visible and win.class ~= "jetbrains-toolbox"
+        if visible and win.class ~= config.classes.toolbox
             and (not next_window or win.focus_history_id < next_window.focus_history_id) then
             next_window = win
         end
@@ -186,7 +189,7 @@ function minimize_active()
 
     local address = win.address
     pending_minimize[address] = true
-    hl.exec_cmd(string.format("qs -c desk ipc call minimize animate %s %d %d %d %d", address, win.at.x, win.at.y, win.size.x, win.size.y))
+    hl.exec_cmd(string.format(config.shell_ipc("minimize animate %s %d %d %d %d"), address, win.at.x, win.at.y, win.size.x, win.size.y))
     minimize_timers[address] = hl.timer(function() finish_minimize(address) end, { timeout = minimize_fallback_ms, type = "oneshot" })
 end
 
@@ -211,7 +214,7 @@ function restore_minimized(address, workspace)
     if pending_restore[address] then return end
 
     pending_restore[address] = workspace
-    hl.exec_cmd("qs -c desk ipc call minimize restore " .. address)
+    hl.exec_cmd(config.shell_ipc("minimize restore " .. address))
     restore_timers[address] = hl.timer(function() finish_restore(address) end, { timeout = restore_fallback_ms, type = "oneshot" })
 end
 
@@ -265,7 +268,7 @@ for _, side in ipairs({ "left", "right", "up", "down" }) do
 end
 
 -- Ctrl + Shift + T: v terminálu nová záložka, jinde zvedne běžící terminál, a když žádný neběží, otevře nový
-local terminal_class = "com.mitchellh.ghostty"
+local terminal_class = config.classes.terminal
 
 local function terminal_shortcut()
     local active = hl.get_active_window()
@@ -288,7 +291,7 @@ local function terminal_shortcut()
     end
 
     -- Minimalizovaný terminál se nejdřív vrátí na aktuální plochu
-    if terminal.workspace and terminal.workspace.name == "special:minimized" then
+    if terminal.workspace and terminal.workspace.name == minimized_workspace then
         hl.dispatch(hl.dsp.window.move({ workspace = hl.get_active_monitor().active_workspace.id, follow = false, window = terminal }))
     end
     hl.dispatch(hl.dsp.focus({ window = terminal }))
@@ -310,50 +313,50 @@ end
 local home_places = {
     {
         matches = function(win)
-            return win.class == "jetbrains-idea" and (win.title:find(" – ", 1, true) or win.title == "Welcome to IntelliJ IDEA")
+            return win.class == config.classes.idea and (win.title:find(" – ", 1, true) or win.title == "Welcome to IntelliJ IDEA")
         end,
-        monitor = "HDMI-A-1",
+        monitor = config.monitors.main,
         rect = maximized_rect,
     },
     {
         matches = function(win) return win.class == terminal_class and win.initial_title == "Ghostty" end,
-        monitor = "DP-1",
+        monitor = config.monitors.side,
         rect = function(mon) return monitor_snap_rect(mon, "right") end,
     },
     {
-        matches = function(win) return win.class == "org.quickshell" and win.title == "Files" end,
-        monitor = "DP-1",
+        matches = function(win) return win.class == config.classes.shell and win.title == "Files" end,
+        monitor = config.monitors.side,
         rect = function(mon) return monitor_snap_rect(mon, "left") end,
     },
     {
         -- Toolbox se sám otevírá na y = 0, pod panelem; patří vpravo nahoře pod panel a velikost si drží svou
-        matches = function(win) return win.class == "jetbrains-toolbox" end,
-        monitor = "HDMI-A-1",
+        matches = function(win) return win.class == config.classes.toolbox end,
+        monitor = config.monitors.main,
         rect = toolbox_rect,
     },
 }
 
 -- Každé okno se umístí jen jednou. Okna otevřená před načtením konfigurace se nepřesouvají.
 -- Pravidla platí už při vzniku okna, takže okno neproblikne jinde a nepřeskakuje mezi monitory.
--- place_on_open pak jen doladí přesné rozměry. DP-1 nemá panel, proto stačí počítat s lištou a mezerou.
+-- place_on_open pak jen doladí přesné rozměry. Vedlejší monitor nemá panel, proto stačí počítat s lištou a mezerou.
 local half_width = "((monitor_w-" .. (2 * outer_gap + snap_gap) .. ")/2)"
 local half_height = "(monitor_h-" .. (2 * outer_gap + bar_height) .. ")"
 local half_size = half_width .. " " .. half_height
 
 hl.window_rule({
-    match = { class = "^com\\.mitchellh\\.ghostty$", initial_title = "^Ghostty$" },
-    monitor = "DP-1",
+    match = { class = config.exact_match(terminal_class), initial_title = "^Ghostty$" },
+    monitor = config.monitors.side,
     size = half_size,
     move = "(monitor_w-" .. outer_gap .. "-" .. half_width .. ") " .. (outer_gap + bar_height),
 })
 hl.window_rule({
-    match = { class = "^org\\.quickshell$", title = "^Files$" },
-    monitor = "DP-1",
+    match = { class = config.exact_match(config.classes.shell), title = "^Files$" },
+    monitor = config.monitors.side,
     size = half_size,
     move = outer_gap .. " " .. (outer_gap + bar_height),
 })
-hl.window_rule({ match = { class = "^jetbrains-idea$" }, monitor = "HDMI-A-1" })
-hl.window_rule({ match = { class = "^jetbrains-toolbox$" }, monitor = "HDMI-A-1" })
+hl.window_rule({ match = { class = config.exact_match(config.classes.idea) }, monitor = config.monitors.main })
+hl.window_rule({ match = { class = config.exact_match(config.classes.toolbox) }, monitor = config.monitors.main })
 
 local placed = {}
 for _, win in ipairs(hl.get_windows()) do
@@ -364,7 +367,7 @@ local function place_on_open(win)
     if placed[win.address] then return end
 
     -- Zapamatovaná poloha má přednost, výchozí místo platí jen při prvním otevření aplikace
-    if require("window-memory").has(win) then
+    if window_memory.has(win) then
         placed[win.address] = true
         return
     end
@@ -388,7 +391,7 @@ hl.on("window.close", function(win) placed[win.address] = nil end)
 
 -- Toolbox okno nezavírá, jen schovává, takže se při každém zobrazení srovná znovu
 hl.on("window.active", function(win)
-    if win and win.class == "jetbrains-toolbox" then
+    if win and win.class == config.classes.toolbox then
         placed[win.address] = nil
         place_on_open(win)
     end
@@ -408,7 +411,7 @@ local toolbox_timer
 local function toolbox_windows()
     local found = {}
     for _, win in ipairs(hl.get_windows()) do
-        if win.class == "jetbrains-toolbox" then
+        if win.class == config.classes.toolbox then
             found[#found + 1] = win
         end
     end
@@ -430,7 +433,7 @@ local function toolbox_tick()
     end
 
     -- Toolbox se po otevření sám posouvá pod panel, hlavní okno se proto drží na svém místě po celou dobu
-    local home = hl.get_monitor("HDMI-A-1")
+    local home = hl.get_monitor(config.monitors.main)
     for _, win in ipairs(windows) do
         if home and win.title == "Toolbox" then
             local rect = toolbox_rect(home, win)
@@ -463,7 +466,7 @@ toolbox_timer = hl.timer(toolbox_tick, { timeout = toolbox_tick_ms, type = "repe
 toolbox_timer:set_enabled(false)
 
 local function watch_toolbox(win)
-    if win and win.class == "jetbrains-toolbox" and not toolbox_timer:is_enabled() then
+    if win and win.class == config.classes.toolbox and not toolbox_timer:is_enabled() then
         toolbox_entered = false
         toolbox_outside_ms = 0
         toolbox_timer:set_enabled(true)
@@ -476,7 +479,7 @@ hl.on("window.active", watch_toolbox)
 hl.bind("CTRL + SHIFT + T", function() terminal_shortcut() end)
 hl.bind("SUPER + Q", hl.dsp.window.close())
 hl.bind("SUPER + F", function() toggle_maximize() end)
-hl.bind("ALT + SHIFT + F", hl.dsp.exec_cmd("qs -c desk ipc call files open"))
+hl.bind("ALT + SHIFT + F", hl.dsp.exec_cmd(config.shell_ipc("files open")))
 
 -- Alt + Tab: karusel oken na monitoru s fokusem, po puštění Alt se vybrané okno zvedne.
 -- Shift + Alt + Tab tu záměrně není, Alt + Shift přepíná rozložení klávesnice; zpět jde šipkou.
@@ -485,7 +488,7 @@ hl.bind("ALT + Alt_L", hl.dsp.global("caelestia:windowSwitcherCommit"), { releas
 hl.bind("ALT + Alt_R", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 
 -- Ťuknutí na Command otevře menu aplikací: keyd při ťuknutí posílá F24 (kód 202), viz keyd-mode.sh
-hl.bind("code:202", hl.dsp.exec_cmd("qs -c desk ipc call launcher toggle"))
+hl.bind("code:202", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
 
 -- Pravý klik na titulkovou lištu otevře nabídku okna (připnutí navrch a ovládání, panel/WindowMenu.qml).
 -- Klik se zároveň předá dál, takže pravý klik uvnitř okna dál patří aplikaci.
@@ -530,13 +533,13 @@ hl.bind("mouse:273", function()
     local win = pos and bar_window_at(pos)
     if win then
         local address = win.address:gsub("^0x", "")
-        hl.exec_cmd(string.format("qs -c desk ipc call windowmenu open 0x%s %d %d %s", address, pos.x, pos.y, tostring(win.pinned)))
+        hl.exec_cmd(string.format(config.shell_ipc("windowmenu open 0x%s %d %d %s"), address, pos.x, pos.y, tostring(win.pinned)))
     end
 end, { non_consuming = true })
 
 -- Screenshot: stejné klávesy jako v Plasmě, stejná akce jako tlačítko v panelu
 for _, keys in ipairs({ "Print", "SHIFT + Print" }) do
-    hl.bind(keys, hl.dsp.exec_cmd("qs -c desk ipc call picker openFreezeClip"))
+    hl.bind(keys, hl.dsp.exec_cmd(config.shell_ipc("picker openFreezeClip")))
 end
 
 -- Přesun okna: tažení za titulkovou lištu nebo Alt + klik kamkoli do okna (změna velikosti jde tažením za okraj)
@@ -557,7 +560,7 @@ local function keep_bars_reachable()
         local on_special = win.workspace and win.workspace.name:find("special", 1, true)
         local fullscreen = win.fullscreen and win.fullscreen ~= 0
         if mon and win.floating and not win.hidden and not on_special and not fullscreen
-            and win.title ~= "" and win.class ~= "jetbrains-toolbox" then
+            and win.title ~= "" and win.class ~= config.classes.toolbox then
             local top = mon.y + mon.reserved.top + bar_height
             if win.at.y < top then
                 hl.dispatch(hl.dsp.window.move({ x = win.at.x, y = top, relative = false, window = win }))

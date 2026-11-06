@@ -2,8 +2,10 @@
 -- Uplatňuje se pravidlem už při vzniku okna, aby nepřeskakovalo. Počáteční titulek odděluje dialogy od hlavního okna.
 local memory = {}
 
-local path = os.getenv("HOME") .. "/.config/desk/window-geometry.lua"
-local excluded_classes = { ["jetbrains-toolbox"] = true }
+local config = require("config")
+
+local path = config.dir .. "/window-geometry.lua"
+local excluded_classes = { [config.classes.toolbox] = true }
 local excluded_titles = { splash = true }
 local min_size = 100
 local check_interval_ms = 1000
@@ -23,9 +25,6 @@ local function key_of(win)
     return win.class .. "\n" .. title_of(win)
 end
 
-local function regex_escape(text)
-    return (text:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?{}|\\]", "\\%0"))
-end
 
 local function load_entries()
     local chunk = loadfile(path)
@@ -53,8 +52,8 @@ end
 local function apply_rule(key, e)
     if rules[key] then rules[key]:set_enabled(false) end
 
-    local match = { class = "^" .. regex_escape(e.class) .. "$" }
-    if e.title ~= "" then match.initial_title = "^" .. regex_escape(e.title) .. "$" end
+    local match = { class = config.exact_match(e.class) }
+    if e.title ~= "" then match.initial_title = config.exact_match(e.title) end
 
     rules[key] = hl.window_rule({
         match = match,

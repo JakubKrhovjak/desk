@@ -2,17 +2,19 @@
 local home = os.getenv("HOME")
 package.path = package.path .. ";" .. home .. "/.config/desk/?.lua;" .. home .. "/.config/hypr/?.lua"
 
+local config = require("config")
+
 local scheme = require("scheme.current")
 local cursor_theme = "breeze_cursors"
 local cursor_size = 24
 
 -- Monitory
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
-hl.monitor({ output = "HDMI-A-1", mode = "2560x1440@144", position = "0x0", scale = 1 })
-hl.monitor({ output = "DP-1", mode = "2560x1440@165", position = "2560x0", scale = 1 })
+hl.monitor({ output = config.monitors.main, mode = "2560x1440@144", position = "0x0", scale = 1 })
+hl.monitor({ output = config.monitors.side, mode = "2560x1440@165", position = "2560x0", scale = 1 })
 
-hl.workspace_rule({ workspace = "1", monitor = "HDMI-A-1", default = true, persistent = true })
-hl.workspace_rule({ workspace = "2", monitor = "DP-1", default = true, persistent = true })
+hl.workspace_rule({ workspace = "1", monitor = config.monitors.main, default = true, persistent = true })
+hl.workspace_rule({ workspace = "2", monitor = config.monitors.side, default = true, persistent = true })
 
 -- Prostředí aplikací
 hl.env("QT_QPA_PLATFORMTHEME", "qtengine")
@@ -29,13 +31,14 @@ hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
+hl.env("DESK_MAIN_MONITOR", config.monitors.main) -- pro shell.qml
 
 -- Vzhled a chování oken
 hl.config({
     general = {
         layout = "dwindle",
-        gaps_in = 5,
-        gaps_out = 5,
+        gaps_in = math.floor(config.gaps.windows / 2),
+        gaps_out = config.gaps.edge,
         border_size = 1,
         resize_on_border = true,
         col = {
@@ -77,7 +80,7 @@ hl.layer_rule({ match = { namespace = "caelestia-desk-(panel|overlay)" }, blur =
 -- Všechna okna plovoucí, jako v Plasmě
 hl.window_rule({ match = { class = ".*" }, float = true })
 hl.window_rule({ match = { class = "^jetbrains-.*$" }, opaque = true })
-hl.window_rule({ match = { class = "^jetbrains-toolbox$" }, ["hyprbars:no_bar"] = true })
+hl.window_rule({ match = { class = config.exact_match(config.classes.toolbox) }, ["hyprbars:no_bar"] = true })
 hl.window_rule({ match = { class = "^jetbrains-.*$", title = "^splash$" }, ["hyprbars:no_bar"] = true }) -- úvodní obrazovka IDE není normální okno
 
 -- Titulkové lišty, zkratky a ovládání oken
@@ -89,7 +92,7 @@ require("keyboard")
 -- Autostart
 hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
-    hl.exec_cmd(home .. "/.config/desk/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
+    hl.exec_cmd(config.dir .. "/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
     hl.exec_cmd("qs -c desk -n -d")
 
     -- Při zkoušení v okně uvnitř Plasmy (DESK_NESTED=1) se systémové služby nespouští
@@ -104,11 +107,11 @@ hl.on("hyprland.start", function()
     -- Ovládání oken je jen v liště vlevo: aplikace si vlastní tlačítka nekreslí (GTK, IntelliJ)
     hl.exec_cmd("gsettings set org.gnome.desktop.wm.preferences button-layout :")
     hl.exec_cmd("mpris-proxy")
-    hl.exec_cmd(home .. "/.config/desk/nightshift.sh")
+    hl.exec_cmd(config.dir .. "/nightshift.sh")
 
     -- Aplikace po přihlášení, nastavují se v Nexusu
-    hl.exec_cmd(home .. "/.config/desk/autostart.sh")
+    hl.exec_cmd(config.dir .. "/autostart.sh")
 
-    hl.exec_cmd("xrandr --output HDMI-A-1 --primary")
-    hl.dispatch(hl.dsp.focus({ monitor = "HDMI-A-1" }))
+    hl.exec_cmd("xrandr --output " .. config.monitors.main .. " --primary")
+    hl.dispatch(hl.dsp.focus({ monitor = config.monitors.main }))
 end)

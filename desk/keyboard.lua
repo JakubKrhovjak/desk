@@ -1,9 +1,11 @@
 -- Klávesa Command jako na Macu: chování v keyd se přepíná podle aktivního okna (keyd-mode.sh).
-local script = os.getenv("HOME") .. "/.config/desk/keyd-mode.sh"
+local config = require("config")
+
+local script = config.dir .. "/keyd-mode.sh"
 
 local modes = {
-    ["com.mitchellh.ghostty"] = "ghostty",
-    ["jetbrains-idea"] = "idea",
+    [config.classes.terminal] = "ghostty",
+    [config.classes.idea] = "idea",
 }
 
 local current

@@ -1,11 +1,11 @@
 -- Titulkové lišty oken (plugin hyprbars). Po aktualizaci Hyprlandu je potřeba plugin znovu zkompilovat,
 -- jinak se nenačte a okna budou jen bez lišt, zbytek prostředí poběží dál.
 local bars = {}
-local home = os.getenv("HOME")
+local config = require("config")
 
 bars.height = 0
 
-local loaded = pcall(hl.plugin.load, home .. "/.config/desk/plugins/hyprbars.so")
+local loaded = pcall(hl.plugin.load, config.dir .. "/plugins/hyprbars.so")
 if not loaded or not (hl.plugin.hyprbars and hl.plugin.hyprbars.add_button) then
     return bars
 end
