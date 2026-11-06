@@ -7,9 +7,8 @@ cursor-color = #afc9eb
 window-padding-x = 2
 window-padding-y = 2
 background = #161a1f
-# Stejné krytí jako bubliny shellu (surfaceOpacity v quickshell/desk/panel/PanelStyle.qml)
-background-opacity = 0.78
-background-blur = true
+background-opacity = 1
+background-blur = false
 foreground = #e1e5ef
 selection-background = #303c4c
 selection-foreground = #e1e5ef

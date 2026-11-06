@@ -6,7 +6,7 @@ import qs.services
 
 // Barvy panelu a bublin prostředí desk. Vypnutou průhlednost respektují.
 Singleton {
-    // Krytí bublin (stejné jako background-opacity v Ghostty), leží přes okna a musí zůstat čitelné
+    // Krytí bublin, leží přes okna a musí zůstat čitelné
     readonly property real surfaceOpacity: 0.78
     readonly property color surface: translucent(surfaceOpacity)
     // Krytí panelu, pod ním je jen tapeta. Musí být nad ignore_alpha jeho pravidla v hyprland.lua, jinak zmizí rozmazání.
