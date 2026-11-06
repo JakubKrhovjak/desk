@@ -13,7 +13,8 @@ caelestia_dir="$HOME/.config/quickshell/caelestia"
 caelestia_git=(git -C "$caelestia_dir")
 caelestia_system=/etc/xdg/quickshell/caelestia
 plugins_src="$HOME/.local/src/hyprland-plugins"
-plugin_target="$HOME/.config/desk/plugins/hyprbars.so"
+desk_dir=$(dirname "$(realpath "$0")")
+plugin_target="$desk_dir/plugins/hyprbars.so"
 
 say() { printf '\n==> %s\n' "$*"; }
 warn() { printf '\n!!! %s\n' "$*" >&2; }
@@ -32,8 +33,8 @@ save_repo() { # $1 = popis, zbytek = příkaz gitu
 }
 
 snapshot() {
-    mkdir -p "$HOME/.config/desk/system/keyd"
-    cp /etc/keyd/*.conf /etc/keyd/desk-cmd "$HOME/.config/desk/system/keyd/" 2>/dev/null
+    mkdir -p "$desk_dir/system/keyd"
+    cp /etc/keyd/*.conf /etc/keyd/desk-cmd "$desk_dir/system/keyd/" 2>/dev/null
     save_repo "desk" "${desk_git[@]}"
     save_repo "caelestia" "${caelestia_git[@]}"
 }

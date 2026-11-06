@@ -84,7 +84,7 @@ ShellRoot {
         target: "launcher"
 
         function toggle(): void {
-            const hasFullscreen = Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false;
+            const hasFullscreen = ShellEnv.hasFullscreen(Hypr.focusedWorkspace);
             const state = ShellState.forScreen(Screens.screens.find(s => s.name === root.primaryScreen));
             if (state && !hasFullscreen)
                 state.launcher = !state.launcher;

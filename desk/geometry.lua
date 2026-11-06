@@ -73,7 +73,15 @@ local function is_visible(win)
         and (win.pinned or (mon.active_workspace and win.workspace.id == mon.active_workspace.id))
 end
 
+-- Plovoucí okno na běžné ploše: ne skryté, minimalizované ani přes celou obrazovku
+local function is_floating_on_desk(win)
+    local on_special = win.workspace and win.workspace.name:find("special", 1, true)
+    local fullscreen = win.fullscreen and win.fullscreen ~= 0
+    return win.monitor and win.floating and not win.hidden and not on_special and not fullscreen
+end
+
 return {
+    is_floating_on_desk = is_floating_on_desk,
     bar_height = bar_height,
     monitor_snap_rect = monitor_snap_rect,
     maximized_rect = maximized_rect,

@@ -30,7 +30,7 @@ palette = 14=#16a085
 palette = 15=#ffffff
 shell-integration = zsh
 
-# Zkratky jako v Ghostty na macOS. Klávesa Command posílá Super přes ~/.config/desk/keyd-mode.sh
+# Zkratky jako v Ghostty na macOS. Klávesa Command posílá Super přes ~/.config/desk/keyd-mode.sh, nová zkratka patří do obou seznamů
 keybind = super+c=copy_to_clipboard:mixed
 keybind = super+v=paste_from_clipboard
 keybind = super+a=select_all

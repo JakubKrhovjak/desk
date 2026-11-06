@@ -1,8 +1,9 @@
 -- Společné nastavení prostředí desk: co se může změnit nebo používá víc souborů, patří sem.
-local dir = os.getenv("HOME") .. "/.config/desk"
+local home = os.getenv("HOME")
 
 local config = {
-    dir = dir,
+    dir = home .. "/.config/desk",
+    state_dir = (os.getenv("XDG_STATE_HOME") or home .. "/.local/state") .. "/desk",
 
     monitors = {
         main = "HDMI-A-1", -- s panelem

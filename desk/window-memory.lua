@@ -4,7 +4,11 @@ local memory = {}
 
 local config = require("config")
 
-local path = config.dir .. "/window-geometry.lua"
+local is_floating_on_desk = require("geometry").is_floating_on_desk
+
+-- Běhový stav, proto mimo konfiguraci a git. Jeden řádek na okno, hodnoty oddělené tabulátorem.
+local path = config.state_dir .. "/window-geometry.tsv"
+local line_pattern = "^([^\t]*)\t([^\t]*)\t([^\t]*)\t(-?%d+)\t(-?%d+)\t(%d+)\t(%d+)$"
 local excluded_classes = { [config.classes.toolbox] = true }
 local excluded_titles = { splash = true }
 local min_size = 100
@@ -25,11 +29,27 @@ local function key_of(win)
     return win.class .. "\n" .. title_of(win)
 end
 
-
 local function load_entries()
-    local chunk = loadfile(path)
-    local ok, saved = pcall(chunk or error)
-    return ok and type(saved) == "table" and saved or {}
+    local file = io.open(path, "r")
+    if not file then return {} end
+
+    local loaded = {}
+    for line in file:lines() do
+        local class, title, monitor, x, y, w, h = line:match(line_pattern)
+        if class then
+            loaded[class .. "\n" .. title] = {
+                class = class,
+                title = title,
+                monitor = monitor,
+                x = tonumber(x),
+                y = tonumber(y),
+                w = tonumber(w),
+                h = tonumber(h),
+            }
+        end
+    end
+    file:close()
+    return loaded
 end
 
 -- Zápis přes dočasný soubor, aby výpadek uprostřed nepoškodil uložená data
@@ -38,12 +58,12 @@ local function save_entries()
     local file = io.open(temporary, "w")
     if not file then return end
 
-    file:write("return {\n")
-    for key, e in pairs(entries) do
-        file:write(string.format("  [%q] = { class = %q, title = %q, monitor = %q, x = %d, y = %d, w = %d, h = %d },\n",
-            key, e.class, e.title, e.monitor, e.x, e.y, e.w, e.h))
+    for _, e in pairs(entries) do
+        -- Titulek s tabulátorem nebo novým řádkem by rozbil formát; takové okno se prostě neuloží
+        if not e.title:find("[\t\n]") then
+            file:write(table.concat({ e.class, e.title, e.monitor, e.x, e.y, e.w, e.h }, "\t"), "\n")
+        end
     end
-    file:write("}\n")
     file:close()
     os.rename(temporary, path)
 end
@@ -65,9 +85,7 @@ end
 
 local function geometry_of(win)
     local mon = win.monitor
-    local on_special = win.workspace and win.workspace.name:find("special", 1, true)
-    local fullscreen = win.fullscreen and win.fullscreen ~= 0
-    if not mon or on_special or fullscreen or win.hidden or not win.mapped or not win.floating then return nil end
+    if not is_floating_on_desk(win) or not win.mapped then return nil end
     if excluded_classes[win.class] or excluded_titles[win.title] or win.class == "" then return nil end
     if win.size.x < min_size or win.size.y < min_size then return nil end
 
@@ -125,6 +143,7 @@ end
 
 -- Volá se až po ostatních pravidlech oken, aby je zapamatované hodnoty přebily
 function memory.start()
+    os.execute("mkdir -p '" .. config.state_dir .. "'")
     entries = load_entries()
     for key, e in pairs(entries) do
         apply_rule(key, e)

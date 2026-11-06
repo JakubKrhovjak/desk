@@ -23,7 +23,7 @@ StyledWindow {
 
     readonly property var screenState: ShellState.forScreen(screen)
     readonly property var monitor: Hypr.monitorFor(screen)
-    readonly property bool hasFullscreen: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
+    readonly property bool hasFullscreen: ShellEnv.hasFullscreen(monitor?.activeWorkspace)
 
     // Launcher z Caelestie čte rozměry ostatních panelů, které tady nejsou
     readonly property var absentPanels: ({

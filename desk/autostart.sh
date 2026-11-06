@@ -3,7 +3,7 @@
 # Spouští se až po startu shellu, protože ikonu v trayi registrují u jeho StatusNotifierWatcheru
 # a například Toolbox to později už nezkusí znovu.
 
-config=${1:-$HOME/.config/desk/autostart.json}
+config=${1:-$(dirname "$(realpath "$0")")/autostart.json}
 
 attempts=0
 while [ "$attempts" -lt 60 ] && ! busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; do

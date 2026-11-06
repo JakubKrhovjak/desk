@@ -8,7 +8,7 @@ base=(
     'main.hostaltgr=layer(altgr)'
 )
 
-# Terminál jako na Macu: Cmd posílá Super a zkratky super+… jsou v ~/.config/ghostty/config. Ostatní Cmd + … nedělají
+# Terminál jako na Macu: Cmd posílá Super a zkratky super+… jsou v ~/.config/ghostty/config. Nová zkratka patří do obou seznamů. Ostatní Cmd + … nedělají
 # nic, protože Ctrl v terminálu posílá signály (Z pozastaví proces, D ukončí shell). F, Q a šipky zůstávají na oknech.
 ghostty=(
     $(printf 'cmd.%s=noop ' {a..e} {g..p} {r..z} backslash slash semicolon dot)

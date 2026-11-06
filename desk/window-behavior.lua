@@ -1,6 +1,8 @@
 -- Chování oken běžící na pozadí: zvedání po fokusu a hlídání titulkových lišt.
 local config = require("config")
-local bar_height = require("geometry").bar_height
+local geometry = require("geometry")
+
+local bar_height = geometry.bar_height
 
 -- Okno s fokusem jde dopředu jako v Plasmě. V obsluze události ještě není nastavené jako aktivní, proto až po chvilce.
 hl.on("window.active", function(win)
@@ -14,10 +16,7 @@ end)
 local function keep_bars_reachable()
     for _, win in ipairs(hl.get_windows()) do
         local mon = win.monitor
-        local on_special = win.workspace and win.workspace.name:find("special", 1, true)
-        local fullscreen = win.fullscreen and win.fullscreen ~= 0
-        if mon and win.floating and not win.hidden and not on_special and not fullscreen
-            and win.title ~= "" and win.class ~= config.classes.toolbox then
+        if geometry.is_floating_on_desk(win) and win.title ~= "" and win.class ~= config.classes.toolbox then
             local top = mon.y + mon.reserved.top + bar_height
             if win.at.y < top then
                 hl.dispatch(hl.dsp.window.move({ x = win.at.x, y = top, relative = false, window = win }))
