@@ -1,0 +1,88 @@
+{
+    "appearance": {
+        "transparency": {
+            "enabled": true
+        }
+    },
+    "background": {
+        "wallpaperEnabled": true
+    },
+    "bar": {
+        "clock": {
+            "background": true,
+            "showDate": true
+        },
+        "excludedScreens": [
+            "^DP-1$"
+        ]
+    },
+    "dashboard": {
+        "enabled": true,
+        "performance": {
+            "showGpu": true
+        }
+    },
+    "general": {
+        "apps": {
+            "terminal": [
+                "ghostty",
+                "--gtk-single-instance=true"
+            ]
+        },
+        "idle": {
+            "lockBeforeSleep": false,
+            "timeouts": [
+                {
+                    "enabled": true,
+                    "idleAction": "lock",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
+                    "timeout": 300
+                },
+                {
+                    "enabled": true,
+                    "idleAction": "dpms off",
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
+                    "returnAction": "dpms on",
+                    "timeout": 300
+                },
+                {
+                    "enabled": true,
+                    "idleAction": [
+                        "suspendThenHibernate"
+                    ],
+                    "inhibitWhenAudio": false,
+                    "inhibitWhenCharging": false,
+                    "respectInhibitors": true,
+                    "timeout": 1800
+                }
+            ]
+        }
+    },
+    "launcher": {
+        "favouriteApps": [
+            "jetbrains-toolbox"
+        ],
+        "useFuzzy": {
+            "apps": false
+        }
+    },
+    "services": {
+        "weatherUnits": "Auto"
+    },
+    "session": {
+        "commands": {
+            "logout": [
+                "hyprctl",
+                "eval",
+                "hl.dispatch(hl.dsp.exit())"
+            ]
+        }
+    },
+    "utilities": {
+        "enabled": true
+    }
+}

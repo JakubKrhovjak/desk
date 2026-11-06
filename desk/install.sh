@@ -8,7 +8,7 @@ desk_dir=$(dirname "$(realpath "$0")")
 config_dir=$(dirname "$desk_dir")
 caelestia_dir="$config_dir/quickshell/caelestia"
 desk_git_dir="$HOME/.local/share/desk.git"
-packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf)
+packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf papirus-icon-theme qtengine darkly-bin adw-gtk-theme)
 
 say() { printf '==> %s\n' "$*"; }
 
@@ -19,7 +19,20 @@ check_packages() {
     say "Chybějící balíčky: $missing"
     [ "${user_only:-false}" = true ] && { echo "Nainstaluj je: yay -S --needed $missing" >&2; exit 1; }
     # shellcheck disable=SC2086 # missing je záměrně seznam oddělený mezerami
-    yay -S --needed $missing
+    yay -S --needed --noconfirm $missing
+}
+
+# Nastavení mimo repozitář (shell, Qt, GTK): výchozí hodnoty jen na čistém systému, existující soubory se nepřepisují
+setup_defaults() {
+    say "Výchozí nastavení shellu a vzhledu"
+    rsync -a --ignore-existing "$desk_dir/defaults/" "$config_dir/"
+}
+
+# Schéma Simpleton a tapeta; bez něj by Hyprland zůstal na záložních barvách z colours.lua
+setup_scheme() {
+    [ -e "${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json" ] && return 0
+    say "Barevné schéma Simpleton"
+    "$desk_dir/season-scheme.py" simpleton || say "Schéma se nepodařilo nastavit, později stačí spustit desk/season-scheme.py simpleton"
 }
 
 # Submodul se po klonu nachází mimo větev a bez lokální upstream; desk-update potřebuje obojí
@@ -42,6 +55,7 @@ setup_icons() {
     say "Motiv ikon Simpleton"
     mkdir -p "$HOME/.local/share/icons"
     rsync -a --ignore-existing "$desk_dir/icon-theme/Simpleton" "$HOME/.local/share/icons/"
+    "$desk_dir/build-icon-theme.sh"
 }
 
 # Odkazy, aby tapety ročních období byly vidět i ve výběru tapet v Nastavení
@@ -49,6 +63,25 @@ setup_wallpapers() {
     say "Tapety ročních období"
     mkdir -p "$HOME/Pictures/Wallpapers"
     ln -sf "$desk_dir"/wallpapers/*.jpg "$HOME/Pictures/Wallpapers/"
+}
+
+# Files jsou výchozí správce složek; položka má plnou cestu, proměnné v Exec se nerozvíjí
+setup_files() {
+    say "Správce souborů Files"
+    mkdir -p "$HOME/.local/share/applications"
+    printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=Files' 'Comment=Two-pane file browser' "Exec=$desk_dir/files-open.sh %f" 'Icon=folder' 'MimeType=inode/directory;' > "$HOME/.local/share/applications/caelestia-files.desktop"
+    xdg-mime default caelestia-files.desktop inode/directory
+}
+
+# Mapa kláves, se kterou počítá keyd-mode.sh; v IDE se vybírá ručně, existující soubor se nepřepisuje
+setup_idea() {
+    say "Mapa kláves macOS Cmd pro IntelliJ"
+    local dir
+    for dir in "$HOME"/.config/JetBrains/IntelliJIdea*/; do
+        [ -d "$dir" ] || continue
+        mkdir -p "$dir/keymaps"
+        rsync -a --ignore-existing "$desk_dir/jetbrains/macOS Cmd.xml" "$dir/keymaps/"
+    done
 }
 
 setup_user() {
@@ -78,8 +111,12 @@ setup_system() {
 check_packages
 setup_caelestia
 setup_exclude
+setup_defaults
 setup_icons
 setup_wallpapers
+setup_scheme
+setup_files
+setup_idea
 setup_user
 [ "${user_only:-false}" = true ] || setup_system
 say "Hotovo. Po odhlášení vyber ve správci přihlášení Desk. Co je potřeba doladit ručně, je v README.md."
