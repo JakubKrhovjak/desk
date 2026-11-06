@@ -17,9 +17,10 @@
     ],
     "tray": true
   },
-  "org.kde.kdeconnect.nonplasma": {
+  "localsend": {
     "command": [
-      "kdeconnect-indicator"
+      "localsend",
+      "--hidden"
     ],
     "tray": false
   }
