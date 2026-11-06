@@ -1,24 +1,26 @@
 #!/bin/bash
 # Nastaví klávesu Command v keyd podle aktivní aplikace: keyd-mode.sh base|ghostty|idea|off
-# Klávesa s logem Windows: držení = Ctrl (vrstva cmd v /etc/keyd/desk-cmd), ťuknutí = F24 (menu aplikací).
+# Command je levý Alt jako na Macu: držení = Ctrl (vrstva cmd v /etc/keyd/desk-cmd), ťuknutí = F24 (menu aplikací).
+# Klávesa s logem Windows je Super pro práci s okny, pravý Alt zůstává (na us běžný Alt, na cz AltGr).
 
 base=(
-    'main.hostcmd=overload(cmd,f24)'
-    'main.hostalt=layer(alt)'
+    'main.hostalt=overload(cmd,f24)'
+    'main.hostwin=layer(meta)'
     'main.hostaltgr=layer(altgr)'
 )
 
 # Terminál jako na Macu: Cmd posílá Super a zkratky super+… jsou v ~/.config/ghostty/config. Nová zkratka patří do obou seznamů. Ostatní Cmd + … nedělají
-# nic, protože Ctrl v terminálu posílá signály (Z pozastaví proces, D ukončí shell). F, Q, M, H, mezerník, Tab a šipky zůstávají na oknech.
+# nic, protože Ctrl v terminálu posílá signály (Z pozastaví proces, D ukončí shell). Q, M, H, mezerník a Tab zůstávají na systémových zkratkách.
 ghostty=(
-    $(printf 'cmd.%s=noop ' {a..e} g {i..l} {n..p} {r..z} backslash slash semicolon dot)
+    $(printf 'cmd.%s=noop ' {a..g} {i..l} {n..p} {r..z} backslash slash semicolon dot)
     $(printf '%s\n' c v a t n w k d p {0..9} minus equal leftbrace rightbrace comma enter backspace | sed 's/.*/cmd.&=M-&/')
 )
 
-# IntelliJ s mapou macOS: Cmd = Ctrl, fyzický Ctrl = Meta (v mapě jsou prohozené)
+# IntelliJ s mapou macOS: Cmd = Ctrl, fyzický Ctrl = Meta (v mapě jsou prohozené); Cmd + šipky řeší mapa, ne Home a End z vrstvy
 idea=(
     'main.leftcontrol=layer(meta)'
     'main.rightcontrol=layer(meta)'
+    $(printf '%s\n' left right up down | sed 's/.*/cmd.&=C-&/')
 )
 
 case "$1" in

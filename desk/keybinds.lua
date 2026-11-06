@@ -1,5 +1,5 @@
--- Všechny klávesové a myší zkratky prostředí. Klávesa Command posílá přes keyd Super jen u šipek, F a Q,
--- v terminálu i u jeho zkratek, jinde Ctrl (keyboard.lua, keyd-mode.sh).
+-- Všechny klávesové a myší zkratky prostředí. Okna ovládá klávesa Super. Command (levý Alt) posílá přes keyd Ctrl,
+-- Super jen u Q, mezerníku, M a H, v terminálu i u jeho zkratek (system/keyd/desk-cmd, keyd-mode.sh).
 local config = require("config")
 local geometry = require("geometry")
 local arrow_pressed = require("snap").arrow_pressed
@@ -42,10 +42,15 @@ end
 hl.bind("CTRL + SHIFT + T", function() terminal_shortcut() end)
 hl.bind("SUPER + Q", hl.dsp.window.close())
 hl.bind("SUPER + F", function() toggle_maximize() end)
-hl.bind("ALT + SHIFT + F", hl.dsp.exec_cmd(config.shell_ipc("files open")))
+hl.bind("SUPER + SHIFT + F", hl.dsp.exec_cmd(config.shell_ipc("files open")))
 
--- Alt + Tab: karusel oken na monitoru s fokusem, po puštění Alt se vybrané okno zvedne.
--- Shift + Alt + Tab tu záměrně není, Alt + Shift přepíná rozložení klávesnice; zpět jde šipkou.
+-- Command + ťuknutí na Shift přepne rozložení klávesnice: keyd posílá F22 (kód 200), viz system/keyd/desk-cmd
+for _, keys in ipairs({ "code:200", "CTRL + code:200" }) do
+    hl.bind(keys, hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
+end
+
+-- Alt + Tab na pravém Altu: karusel oken na monitoru s fokusem, po puštění Alt se vybrané okno zvedne.
+-- Zpět jde šipkou.
 hl.bind("ALT + TAB", hl.dsp.global("caelestia:windowSwitcherNext"), { repeating = true })
 hl.bind("ALT + Alt_L", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 hl.bind("ALT + Alt_R", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
@@ -111,5 +116,5 @@ for _, keys in ipairs({ "Print", "SHIFT + Print", "CTRL + SHIFT + code:13", "SUP
     hl.bind(keys, hl.dsp.exec_cmd(config.shell_ipc("picker openFreezeClip")))
 end
 
--- Přesun okna: tažení za titulkovou lištu nebo Alt + klik kamkoli do okna (změna velikosti jde tažením za okraj)
-hl.bind("ALT + mouse:272", hl.dsp.window.drag(), { mouse = true })
+-- Přesun okna: tažení za titulkovou lištu nebo Super + klik kamkoli do okna (změna velikosti jde tažením za okraj)
+hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })

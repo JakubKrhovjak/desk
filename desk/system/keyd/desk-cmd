@@ -1,13 +1,16 @@
-# Vrstva klávesy Command pro prostředí desk: drží jako Ctrl, výjimky ovládají okna přes Super.
+# Vrstva klávesy Command pro prostředí desk (levý Alt, jako na Macu vedle mezerníku): drží jako Ctrl, výjimky níže.
 # Na fyzickou klávesu ji napojí až ~/.config/desk/keyd-mode.sh, v Plasmě a Caelestii se nepoužívá.
 [cmd:C]
-left = M-left
-right = M-right
-up = M-up
-down = M-down
-f = M-f
-q = M-q
+# Pohyb v textu jako na Macu; okna ovládá klávesa Super
+left = home
+right = end
+up = C-home
+down = C-end
+# Ťuknutí na Shift při drženém Command přepne rozložení klávesnice (F22, ~/.config/desk/keybinds.lua), držení je běžný Shift
+leftshift = overload(shift, f22)
+rightshift = overload(shift, f22)
 # Systémové zkratky jako na Macu, řeší je ~/.config/desk/keybinds.lua
+q = M-q
 space = M-space
 m = M-m
 h = M-h
