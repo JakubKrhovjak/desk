@@ -91,7 +91,7 @@ hl.bind("mouse:273", function()
     local win = pos and bar_window_at(pos)
     if win then
         local address = win.address:gsub("^0x", "")
-        hl.exec_cmd(string.format(config.shell_ipc("windowmenu open 0x%s %d %d %s"), address, pos.x, pos.y, tostring(win.pinned)))
+        hl.exec_cmd(string.format(config.shell_ipc("windowmenu open 0x%s %d %d %s"), address, math.floor(pos.x), math.floor(pos.y), tostring(win.pinned)))
     end
 end, { non_consuming = true })
 
