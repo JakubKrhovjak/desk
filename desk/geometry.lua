@@ -56,16 +56,16 @@ local function apply_rect(win, x, y, w, h)
     hl.dispatch(hl.dsp.window.move({ x = x, y = y, relative = false, window = win }))
 end
 
--- Celá pracovní plocha monitoru přesně po panel, bez mezery
+-- Celá pracovní plocha monitoru uvnitř rámečku plochy (panel/ScreenFrame.qml)
 local function maximized_rect(mon, top)
     local res = mon.reserved
     top = top or res.top
 
     return {
-        x = mon.x + res.left,
-        y = mon.y + top + bar_height,
-        w = math.floor(mon.width / mon.scale - res.left - res.right),
-        h = math.floor(mon.height / mon.scale - top - res.bottom) - bar_height,
+        x = mon.x + res.left + outer_gap,
+        y = mon.y + top + outer_gap + bar_height,
+        w = math.floor(mon.width / mon.scale - res.left - res.right - 2 * outer_gap),
+        h = math.floor(mon.height / mon.scale - top - res.bottom - 2 * outer_gap) - bar_height,
     }
 end
 

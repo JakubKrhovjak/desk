@@ -50,8 +50,18 @@ hl.bind("ALT + TAB", hl.dsp.global("caelestia:windowSwitcherNext"), { repeating 
 hl.bind("ALT + Alt_L", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 hl.bind("ALT + Alt_R", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 
+-- Cmd + Tab jako Alt + Tab: keyd posílá F23 (kód 201) při drženém Ctrl, puštěním Command se okno vybere (system/keyd/desk-cmd)
+hl.bind("CTRL + code:201", hl.dsp.global("caelestia:windowSwitcherNext"), { repeating = true })
+hl.bind("CTRL + Control_L", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
+hl.bind("CTRL + Control_R", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
+
 -- Ťuknutí na Command otevře menu aplikací: keyd při ťuknutí posílá F24 (kód 202), viz keyd-mode.sh
 hl.bind("code:202", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
+
+-- Systémové zkratky jako na Macu: Cmd + mezerník otevře nabídku, Cmd + M a Cmd + H schovají okno
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
+hl.bind("SUPER + M", function() minimize_active() end)
+hl.bind("SUPER + H", function() minimize_active() end)
 
 -- Pravý klik na titulkovou lištu otevře nabídku okna (připnutí navrch a ovládání, panel/WindowMenu.qml).
 -- Klik se zároveň předá dál, takže pravý klik uvnitř okna dál patří aplikaci.
@@ -95,8 +105,9 @@ hl.bind("mouse:273", function()
     end
 end, { non_consuming = true })
 
--- Screenshot: stejné klávesy jako v Plasmě, stejná akce jako tlačítko v panelu
-for _, keys in ipairs({ "Print", "SHIFT + Print" }) do
+-- Screenshot: stejné klávesy jako v Plasmě, stejná akce jako tlačítko v panelu; Cmd + Shift + 4 jako na Macu
+-- (kód klávesy 4 kvůli české klávesnici, Super je varianta z režimu terminálu v keyd-mode.sh)
+for _, keys in ipairs({ "Print", "SHIFT + Print", "CTRL + SHIFT + code:13", "SUPER + SHIFT + code:13" }) do
     hl.bind(keys, hl.dsp.exec_cmd(config.shell_ipc("picker openFreezeClip")))
 end
 

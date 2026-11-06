@@ -7,3 +7,9 @@ up = M-up
 down = M-down
 f = M-f
 q = M-q
+# Systémové zkratky jako na Macu, řeší je ~/.config/desk/keybinds.lua
+space = M-space
+m = M-m
+h = M-h
+# F23 při drženém Ctrl: přepínač oken zůstane otevřený, dokud je Command dole
+tab = f23

@@ -38,7 +38,8 @@ StyledWindow {
     name: "desk-overlay"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.exclusionMode: ExclusionMode.Normal
-    WlrLayershell.keyboardFocus: (screenState?.launcher || screenState?.session) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    // Nabídka aplikací chce psaní hned po otevření; OnDemand by klávesnici předal až po kliknutí
+    WlrLayershell.keyboardFocus: screenState?.launcher ? WlrKeyboardFocus.Exclusive : screenState?.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     anchors.top: true
     anchors.bottom: true
@@ -56,7 +57,7 @@ StyledWindow {
     // Klikat jde jen na to, co je zrovna vidět; zbytek propouští myš do oken
     mask: Region {
         Region { item: dashZone }
-        Region { item: launcherBg.visible ? launcherBg : null }
+        Region { item: launcherCatcher.visible ? launcherCatcher : null }
         Region { item: popoutBg.visible ? popoutBg : null }
         Region { item: notifsBg.visible ? notifsBg : null }
         Region { item: sessionBg.visible ? sessionBg : null }
@@ -66,12 +67,12 @@ StyledWindow {
         Region { item: utilitiesBg.visible ? utilitiesBg : null }
     }
 
-    // Klik mimo zavře otevřený panel; horní panel zůstává klikací, aby tlačítko umělo i zavřít
+    // Klik mimo zavře otevřený panel; horní panel zůstává klikací, aby tlačítko umělo i zavřít.
+    // Nabídka aplikací tu není: má výhradní klávesnici, se kterou se grab hned zruší a nabídku by zavřel.
     HyprlandFocusGrab {
-        active: (root.screenState?.launcher || root.screenState?.session || (root.screenState?.sidebar && root.sidebarPinned)) ?? false
+        active: (root.screenState?.session || (root.screenState?.sidebar && root.sidebarPinned)) ?? false
         windows: [root, root.panelWindow]
         onCleared: {
-            root.screenState.launcher = false;
             root.screenState.session = false;
             root.screenState.sidebar = false;
             root.sidebarPinned = false;
@@ -117,7 +118,7 @@ StyledWindow {
     HoldTimer {
         id: dashClose
 
-        held: dashHover.hovered || (root.panelWindow?.dashboardHeld ?? false)
+        held: dashHover.hovered || dashContentHover.hovered || (root.panelWindow?.dashboardHeld ?? false)
         interval: 200
         onTriggered: {
             if (root.screenState?.dashboard) {
@@ -140,7 +141,8 @@ StyledWindow {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         width: dash.implicitWidth || root.panelWindow.dashboardWidth
-        height: root.screenState?.dashboard ? dash.implicitHeight : 0
+        // Bez animované výšky: zmenšující se plocha by při přepnutí záložky utekla zpod myši
+        height: root.screenState?.dashboard ? Math.max(dash.implicitHeight, dash.nonAnimHeight) : 0
 
         HoverHandler {
             id: dashHover
@@ -164,8 +166,24 @@ StyledWindow {
 
         keepLoaded: true
         screenState: root.screenState
+
+        // Tlačítka uvnitř si hover berou pro sebe, proto hlídání i tady, ne jen na ploše pod dashboardem
+        HoverHandler {
+            id: dashContentHover
+        }
+
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    // Klik vedle nabídky aplikací ji zavře; vrstva začíná až pod panelem, ten zůstává klikací
+    MouseArea {
+        id: launcherCatcher
+
+        anchors.fill: parent
+        visible: launcher.visible
+        acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+        onPressed: root.screenState.launcher = false
     }
 
     // Nabídka aplikací: objeví se uprostřed obrazovky jako na Macu

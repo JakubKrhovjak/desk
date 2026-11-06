@@ -22,6 +22,17 @@ import qs.modules.nexus
 ShellRoot {
     id: root
 
+    // Rámeček plochy na všech monitorech
+    Variants {
+        model: Screens.screens
+
+        ScreenFrame {
+            required property ShellScreen modelData
+
+            screen: modelData
+        }
+    }
+
     // Panel a vše k němu patřící jen na hlavním monitoru
     readonly property string primaryScreen: Screens.screens.some(s => s.name === ShellEnv.mainMonitor) ? ShellEnv.mainMonitor : (Screens.screens[0]?.name ?? "")
 

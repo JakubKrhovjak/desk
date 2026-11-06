@@ -9,9 +9,9 @@ base=(
 )
 
 # Terminál jako na Macu: Cmd posílá Super a zkratky super+… jsou v ~/.config/ghostty/config. Nová zkratka patří do obou seznamů. Ostatní Cmd + … nedělají
-# nic, protože Ctrl v terminálu posílá signály (Z pozastaví proces, D ukončí shell). F, Q a šipky zůstávají na oknech.
+# nic, protože Ctrl v terminálu posílá signály (Z pozastaví proces, D ukončí shell). F, Q, M, H, mezerník, Tab a šipky zůstávají na oknech.
 ghostty=(
-    $(printf 'cmd.%s=noop ' {a..e} {g..p} {r..z} backslash slash semicolon dot)
+    $(printf 'cmd.%s=noop ' {a..e} g {i..l} {n..p} {r..z} backslash slash semicolon dot)
     $(printf '%s\n' c v a t n w k d p {0..9} minus equal leftbrace rightbrace comma enter backspace | sed 's/.*/cmd.&=M-&/')
 )
 

@@ -41,10 +41,11 @@ local function fitted_rect(mon, old_top, rect)
     end
 
     local work = maximized_rect(mon)
-    local bottom = work.y + work.h
     local h = math.min(rect.h, work.h)
-    local y = math.min(math.max(rect.y, work.y), bottom - h)
-    return { x = rect.x, y = y, w = rect.w, h = h }
+    local w = math.min(rect.w, work.w)
+    local y = math.min(math.max(rect.y, work.y), work.y + work.h - h)
+    local x = math.min(math.max(rect.x, work.x), work.x + work.w - w)
+    return { x = x, y = y, w = w, h = h }
 end
 
 local function monitor_named(name)

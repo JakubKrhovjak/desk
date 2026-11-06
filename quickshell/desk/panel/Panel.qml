@@ -61,8 +61,8 @@ StyledWindow {
     }
 
     // Spoušť dashboardu: horní okraj obrazovky uprostřed; otevřený dashboard drží celá výška panelu nad ním
-    readonly property bool dashboardTriggered: dashboardHold.hovered && dashboardHold.point.position.y < 3
-    readonly property bool dashboardHeld: dashboardHold.hovered
+    readonly property bool dashboardTriggered: dashboardHeld && dashboardHold.point.position.y < 3
+    readonly property bool dashboardHeld: dashboardHold.hovered && Math.abs(dashboardHold.point.position.x - panelRow.width / 2) < dashboardWidth / 2
     // Šířka dashboardu, než se poprvé načte
     readonly property int dashboardWidth: 854
 
@@ -80,22 +80,18 @@ StyledWindow {
         return button.mapToItem(contentItem, button.width / 2, 0).x;
     }
 
-    Item {
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: root.dashboardWidth
-
-        HoverHandler {
-            id: dashboardHold
-        }
-    }
-
     RowLayout {
+        id: panelRow
+
         anchors.fill: parent
         anchors.leftMargin: 6
         anchors.rightMargin: 6
         spacing: 2
+
+        // Na rodiči položek: tlačítka si berou hover pro sebe a handler na samostatné ploše by myš nad nimi neviděl
+        HoverHandler {
+            id: dashboardHold
+        }
 
         PanelGroup {
             PanelButton {

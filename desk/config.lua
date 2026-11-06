@@ -19,9 +19,11 @@ local config = {
     monitors = load_monitors(),
 
     gaps = {
-        windows = 10, -- mezi okny
+        windows = 0, -- mezi okny; hranici tvoří jejich modrý okraj
         edge = 5, -- mezi okny a okrajem plochy
     },
+
+    window_rounding = 15, -- stejný poloměr mají vnitřní rohy rámečku plochy (panel/ScreenFrame.qml)
 
     classes = {
         terminal = "com.mitchellh.ghostty",

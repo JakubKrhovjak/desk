@@ -48,6 +48,8 @@ hl.env("DESK_MAIN_MONITOR", config.monitors.main)
 hl.env("DESK_DIR", config.dir)
 hl.env("DESK_STATE_DIR", config.state_dir)
 hl.env("DESK_MINIMIZED_WORKSPACE", config.minimized_workspace)
+hl.env("DESK_EDGE_GAP", tostring(config.gaps.edge))
+hl.env("DESK_WINDOW_ROUNDING", tostring(config.window_rounding))
 
 -- Vzhled a chování oken
 hl.config({
@@ -57,13 +59,14 @@ hl.config({
         gaps_out = config.gaps.edge,
         border_size = 1,
         resize_on_border = true,
+        -- Modrý okraj odděluje okna od rámečku plochy, proto je stejný i u neaktivních oken
         col = {
             active_border = "rgba(" .. scheme.primary .. "e6)",
-            inactive_border = "rgba(" .. scheme.onSurfaceVariant .. "11)",
+            inactive_border = "rgba(" .. scheme.primary .. "e6)",
         },
     },
     decoration = {
-        rounding = 15,
+        rounding = config.window_rounding,
         rounding_power = 2,
         blur = { enabled = true, size = 8, passes = 2, ignore_opacity = true, new_optimizations = true },
         shadow = { enabled = true, range = 15, render_power = 4, color = "rgba(" .. scheme.inversePrimary .. "10)" },
@@ -91,7 +94,7 @@ hl.config({
 })
 
 -- Průhledný shell s rozostřením; okna aplikací průhledná nejsou
-hl.layer_rule({ match = { namespace = "caelestia-desk-(panel|overlay)" }, blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ match = { namespace = "caelestia-desk-(panel|overlay|frame)" }, blur = true, ignore_alpha = 0.3 })
 
 -- Všechna okna plovoucí, jako v Plasmě
 hl.window_rule({ match = { class = ".*" }, float = true })
