@@ -24,8 +24,9 @@ StyledRect {
     }
 
     anchors.verticalCenter: parent?.verticalCenter
-    implicitWidth: big ? DeskPanelSettings.buttonSize : DeskPanelSettings.smallButtonSize
-    implicitHeight: implicitWidth
+    // Malá tlačítka vpravo jsou jen tak široká jako ikona nebo text, rozestupy by jinak rostly s výškou panelu
+    implicitWidth: big ? DeskPanelSettings.buttonSize : label !== "" ? labelText.implicitWidth + 12 : DeskPanelSettings.smallIconSize + 4
+    implicitHeight: big ? DeskPanelSettings.buttonSize : DeskPanelSettings.smallButtonSize
     radius: Tokens.rounding.full
     color: active ? Colours.palette.m3secondaryContainer : "transparent"
 
@@ -36,6 +37,8 @@ StyledRect {
     }
 
     StyledText {
+        id: labelText
+
         anchors.centerIn: parent
         visible: root.label !== ""
         text: root.label

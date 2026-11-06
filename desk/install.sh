@@ -37,6 +37,20 @@ setup_exclude() {
     printf '%s\n' '/*' '!/README.md' '!/.gitmodules' '!/desk/' '/desk/plugins/' '!/quickshell/' '/quickshell/*' '!/quickshell/desk/' '!/quickshell/caelestia' '!/ghostty/' '/ghostty/*' '!/ghostty/config' > "$desk_git_dir/info/exclude"
 }
 
+# Živá kopie se přebarvuje podle schématu (recolor-icons.sh), proto mimo git; existující soubory se nepřepisují
+setup_icons() {
+    say "Motiv ikon Simpleton"
+    mkdir -p "$HOME/.local/share/icons"
+    rsync -a --ignore-existing "$desk_dir/icon-theme/Simpleton" "$HOME/.local/share/icons/"
+}
+
+# Odkazy, aby tapety ročních období byly vidět i ve výběru tapet v Nastavení
+setup_wallpapers() {
+    say "Tapety ročních období"
+    mkdir -p "$HOME/Pictures/Wallpapers"
+    ln -sf "$desk_dir"/wallpapers/*.jpg "$HOME/Pictures/Wallpapers/"
+}
+
 setup_user() {
     say "Příkaz desk-update"
     mkdir -p "$HOME/.local/bin"
@@ -64,6 +78,8 @@ setup_system() {
 check_packages
 setup_caelestia
 setup_exclude
+setup_icons
+setup_wallpapers
 setup_user
 [ "${user_only:-false}" = true ] || setup_system
 say "Hotovo. Po odhlášení vyber ve správci přihlášení Desk. Co je potřeba doladit ručně, je v README.md."

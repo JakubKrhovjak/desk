@@ -13,6 +13,21 @@ icon_colour=$(colour_of secondary)
 tint_colour=$(colour_of primary)
 [[ $icon_colour =~ ^[0-9a-fA-F]{6}$ && $tint_colour =~ ^[0-9a-fA-F]{6}$ ]] || { echo "recolor-icons: ve schématu chybí barvy" >&2; exit 1; }
 
+# Vlastní ikony aplikací: kopie z repa, ať se přebarví s ostatními (desk/icons má barvu v .ColorScheme-Text)
+desk_dir=$(dirname "$(realpath "$0")")
+install -m644 "$desk_dir"/icons/*.svg "$apps/"
+
+# Tyhle aplikace míří na obrázek ve svém projektu, který se nepřebarví; vrací je to na ikonu motivu
+use_theme_icon() { # $1 = soubor .desktop, $2 = jméno ikony v motivu
+    local entry="$HOME/.local/share/applications/$1"
+    [[ -f $entry ]] && sed -i -E "s|^Icon=/.*|Icon=$2|" "$entry"
+}
+use_theme_icon arch-assistant.desktop arch-assistant
+use_theme_icon mindmap.desktop mindmap
+use_theme_icon mindmap-linux.desktop mindmap
+use_theme_icon modbus-gui.desktop modbus-gui
+use_theme_icon openplc-editor.desktop openplc-editor
+
 # Barva čar je v každém souboru jen v .ColorScheme-Text, jemný podklad v přechodu stop-color
 find "$theme/scalable" -type f -name '*.svg' -print0 | xargs -0 sed -i -E \
     -e "s/(\.ColorScheme-Text \{ color:#)[0-9a-fA-F]{6}/\1$icon_colour/" \
@@ -31,6 +46,7 @@ for entry in "$HOME"/.local/share/applications/jetbrains-*-*.desktop; do
     [[ -n $existing ]] && alias_icon "$icon" "${existing%.svg}"
 done
 
+alias_icon com.mitchellh.ghostty utilities-terminal
 alias_icon btop utilities-system-monitor
 alias_icon chromium brave-desktop
 alias_icon com.saivert.pwvucontrol multimedia-volume-control

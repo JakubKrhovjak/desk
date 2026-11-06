@@ -10,7 +10,7 @@ import qs.services
 import qs.modules.nexus
 
 // Správce úloh jako v Plasmě: jedna malá ikona na aplikaci, připnuté aplikace zůstávají i bez okna.
-// Klik: spustí neběžící aplikaci, zvedne okno, u více oken mezi nimi přepíná. Minimalizace je jen tlačítko v liště okna.
+// Klik: spustí neběžící aplikaci, zvedne okno, jediné aktivní okno minimalizuje, u více oken mezi nimi přepíná.
 // Prostřední tlačítko zavře okno, pravé otevře nabídku s připnutím. Tažením jde ikony přeřadit.
 // Minimalizace = skrytá speciální plocha, Hyprland vlastní nemá.
 Item {
@@ -43,6 +43,8 @@ Item {
         const group = windowsOf(key);
         if (group.length === 0)
             launch(key);
+        else if (group.length === 1 && group[0] === Hyprland.activeToplevel && !ShellEnv.isMinimized(group[0]))
+            HyprWindows.minimize(group[0].address);
         else
             HyprWindows.show(group[(group.indexOf(Hyprland.activeToplevel) + 1) % group.length]);
     }

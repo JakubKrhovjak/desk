@@ -14,6 +14,7 @@ The repository's work tree is `~/.config`, and only the paths listed in `desk_pa
 | `quickshell/desk/` | The shell: panel and `shell.qml` |
 | `quickshell/caelestia/` | Submodule with the patched Caelestia copy |
 | `ghostty/config` | Terminal config |
+| `desk/icon-theme/Simpleton/` | Source of the icon theme. `install.sh` copies it to `~/.local/share/icons`, where `recolor-icons.sh` recolours it to match the colour scheme. Add new icons here too. |
 
 Panel pins and order, Night Shift settings and window positions live outside git, in `~/.local/state/desk`. They have no backup, so a fresh install starts with defaults.
 
@@ -40,7 +41,6 @@ The script installs missing packages, prepares the submodule branches, builds th
 - Monitors: the Displays page in Nexus. It writes `desk/monitor-settings.lua` and goes back on its own unless you keep the changes.
 - Keyboards: `desk/system/keyd/` is written for specific devices.
 - Startup apps: `desk/autostart.json` can be edited in Nexus (Apps → app → Startup). A leading `~/` in a command is expanded.
-- Icons: the Simpleton theme in `~/.local/share/icons` is not part of this repository.
 - Colours: until Caelestia generates its scheme, Hyprland uses fallback colours from `desk/colours.lua`.
 - Not restored from this repository: `~/.config/caelestia/shell.json`, `~/.config/caelestia/hypr-user.lua` and the `macOS Cmd` keymap for IntelliJ IDEA.
 
@@ -49,6 +49,10 @@ The script installs missing packages, prepares the submodule branches, builds th
 Panel height and icon size are set in Nexus (Panels), or by right-clicking the panel. They are stored in `desk/panel-settings.json`.
 
 An app with a tray icon lives only in the tray, unless you pin it to the panel. Clicking its icon shows or hides the window, and the close button in the title bar only hides it. `Super + Q` always closes the window.
+
+## Colours
+
+Nexus (Wallpaper & style → Colours) offers Simpleton, four warm pastel seasons and colours from the wallpaper. `desk/season-scheme.py` generates a scheme with Caelestia's own generator and sets the matching wallpaper. `desk/wallpapers/generate.py` draws the season wallpapers.
 
 ## Updating
 

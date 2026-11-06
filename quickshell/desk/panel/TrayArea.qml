@@ -20,7 +20,7 @@ Row {
         return PanelApps.centerOf(icons, candidate => PanelApps.trayKey(candidate.modelData) === key, window);
     }
 
-    spacing: 4
+    spacing: 0
 
     FerdiumUnread {
         id: ferdiumUnread
@@ -38,7 +38,7 @@ Row {
 
             required property SystemTrayItem modelData
 
-            implicitWidth: DeskPanelSettings.iconSize + 2
+            implicitWidth: DeskPanelSettings.trayIconSize + 7
             implicitHeight: DeskPanelSettings.buttonSize
             anchors.verticalCenter: parent?.verticalCenter
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton

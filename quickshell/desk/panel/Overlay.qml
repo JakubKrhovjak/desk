@@ -469,8 +469,7 @@ StyledWindow {
         visible: session.visible
         opacity: session.opacity
         color: Colours.tPalette.m3surface
-        topLeftRadius: Tokens.rounding.extraLarge
-        bottomLeftRadius: Tokens.rounding.extraLarge
+        radius: Tokens.rounding.extraLarge
     }
 
     Session.Wrapper {
@@ -479,7 +478,6 @@ StyledWindow {
         screenState: root.screenState
         sidebarVisible: sidebar.visible
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
+        anchors.centerIn: parent
     }
 }
