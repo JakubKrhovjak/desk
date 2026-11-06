@@ -46,9 +46,14 @@ rebuild_hyprbars() {
     # hyprpm.toml páruje commit Hyprlandu s commitem pluginu; bez záznamu platí nejnovější verze
     local hyprland_commit pin
     hyprland_commit=$(Hyprland --version | grep -oE 'commit [0-9a-f]{40}' | head -n 1 | cut -d' ' -f2)
+    git -C "$plugins_src" checkout -q -- .
     git -C "$plugins_src" checkout -q origin/main
     pin=$(grep -F "\"$hyprland_commit\"" "$plugins_src/hyprpm.toml" | grep -oE '"[0-9a-f]{40}"' | tail -n 1 | tr -d '"')
     [ -n "$pin" ] && git -C "$plugins_src" checkout -q "$pin"
+
+    # Bez patche plugin zruší na liště i pravý klik a nabídka okna se neotevře
+    git -C "$plugins_src" apply "$desk_dir/system/hyprbars-right-click.patch" \
+        || warn "patch hyprbars nesedí na novou verzi: pravý klik na lištu nebude otevírat nabídku okna"
 
     if make -C "$plugins_src/hyprbars" all >/dev/null; then
         install -m755 "$plugins_src/hyprbars/hyprbars.so" "$plugin_target"

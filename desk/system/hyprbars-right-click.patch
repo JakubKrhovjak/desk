@@ -1,0 +1,22 @@
+diff --git a/hyprbars/barDeco.cpp b/hyprbars/barDeco.cpp
+index e57f77b..eaffc30 100644
+--- a/hyprbars/barDeco.cpp
++++ b/hyprbars/barDeco.cpp
+@@ -1,5 +1,7 @@
+ #include "barDeco.hpp"
+ 
++#include <linux/input-event-codes.h>
++
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/desktop/state/FocusState.hpp>
+ #include <hyprland/src/desktop/state/WindowState.hpp>
+@@ -125,7 +127,8 @@ bool CHyprBar::inputIsValid() {
+ }
+ 
+ void CHyprBar::onMouseButton(Event::SCallbackInfo& info, IPointer::SButtonEvent e) {
+-    if (!inputIsValid())
++    // Ostatní tlačítka patří zkratkám: pravý klik na liště otevírá nabídku okna
++    if (e.button != BTN_LEFT || !inputIsValid())
+         return;
+ 
+     if (e.state != WL_POINTER_BUTTON_STATE_PRESSED) {
