@@ -19,7 +19,6 @@ import qs.modules.sidebar as Sidebar
 StyledWindow {
     id: root
 
-    required property bool primary
     required property var panelWindow
 
     readonly property var screenState: ShellState.forScreen(screen)
@@ -61,7 +60,7 @@ StyledWindow {
         Region { item: sidebarBg.visible ? sidebarBg : null }
     }
 
-    // Klik mimo zavře otevřený panel; dolní panel zůstává klikací, aby tlačítko umělo i zavřít
+    // Klik mimo zavře otevřený panel; horní panel zůstává klikací, aby tlačítko umělo i zavřít
     HyprlandFocusGrab {
         active: (root.screenState?.launcher || root.screenState?.session || (root.screenState?.sidebar && root.sidebarPinned)) ?? false
         windows: [root, root.panelWindow]
@@ -91,11 +90,8 @@ StyledWindow {
     readonly property bool dashboardTriggered: panelWindow?.dashboardTriggered ?? false
     readonly property bool dashboardHeld: dashHover.hovered || (panelWindow?.dashboardHeld ?? false)
 
-    readonly property bool dashOpenLog: screenState?.dashboard ?? false // DOČASNÉ
-    onDashOpenLogChanged: console.log("DASHLOG", Date.now() % 100000, "open", dashOpenLog) // DOČASNÉ
 
     onDashboardTriggeredChanged: {
-        console.log("DASHLOG", Date.now() % 100000, "trigger", dashboardTriggered); // DOČASNÉ
         if (dashboardTriggered)
             dashOpen.restart();
         else
@@ -103,7 +99,6 @@ StyledWindow {
     }
 
     onDashboardHeldChanged: {
-        console.log("DASHLOG", Date.now() % 100000, "held", dashboardHeld); // DOČASNÉ
         if (dashboardHeld)
             dashClose.stop();
         else if (screenState?.dashboard)
@@ -151,8 +146,6 @@ StyledWindow {
 
         HoverHandler {
             id: dashHover
-
-            onHoveredChanged: console.log("DASHLOG", Date.now() % 100000, "zone", hovered, "h", dashZone.height) // DOČASNÉ
         }
     }
 
@@ -357,7 +350,7 @@ StyledWindow {
     Notifications.Wrapper {
         id: notifs
 
-        visible: root.primary && height > 0
+        visible: height > 0
         screenState: root.screenState
         sidebarPanel: sidebar
         osdPanel: absentPanel

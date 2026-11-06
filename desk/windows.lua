@@ -193,11 +193,13 @@ end
 -- Obnovení z panelu: shell přehraje animaci a na jejím konci zavolá finish_restore; pojistka vrátí okno i bez animace
 local restore_fallback_ms = 900
 local pending_restore = {}
+local restore_timers = {}
 
 function finish_restore(address)
     local workspace = pending_restore[address]
     if not workspace then return end
     pending_restore[address] = nil
+    restore_timers[address] = nil
 
     local target = "address:" .. address
     hl.dispatch(hl.dsp.window.move({ workspace = workspace, follow = false, window = target }))
@@ -210,7 +212,7 @@ function restore_minimized(address, workspace)
 
     pending_restore[address] = workspace
     hl.exec_cmd("qs -c desk ipc call minimize restore " .. address)
-    hl.timer(function() finish_restore(address) end, { timeout = restore_fallback_ms, type = "oneshot" })
+    restore_timers[address] = hl.timer(function() finish_restore(address) end, { timeout = restore_fallback_ms, type = "oneshot" })
 end
 
 hl.on("workspace.special_active", hide_minimized)
@@ -240,7 +242,7 @@ local chord_pending
 local chord_press = 0
 local chord_timer
 
-function arrow_pressed(side)
+local function arrow_pressed(side)
     if chord_pending == chord_partner[side] then
         stretch_window(chord_pending, side)
         chord_pending = nil
@@ -265,7 +267,7 @@ end
 -- Ctrl + Shift + T: v terminálu nová záložka, jinde zvedne běžící terminál, a když žádný neběží, otevře nový
 local terminal_class = "com.mitchellh.ghostty"
 
-function terminal_shortcut()
+local function terminal_shortcut()
     local active = hl.get_active_window()
     if active and active.class == terminal_class then
         hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "T", window = active }))

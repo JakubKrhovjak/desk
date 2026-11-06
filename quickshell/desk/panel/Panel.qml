@@ -16,7 +16,6 @@ import qs.modules.nexus
 StyledWindow {
     id: root
 
-    required property bool primary
     readonly property var screenState: ShellState.forScreen(screen)
 
     signal filesRequested
@@ -122,7 +121,6 @@ StyledWindow {
 
                 SortItem {
                     key: "tray"
-                    shown: root.primary
 
                     TrayArea {
                         window: root

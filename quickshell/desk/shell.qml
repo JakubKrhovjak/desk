@@ -103,7 +103,6 @@ ShellRoot {
                 id: panel
 
                 screen: perScreen.modelData
-                primary: perScreen.modelData.name === root.primaryScreen
                 onFilesRequested: filePicker.open()
                 onLockRequested: lock.lock.locked = true
                 Component.onCompleted: root.mainPanel = panel
@@ -111,7 +110,6 @@ ShellRoot {
 
             Overlay {
                 screen: perScreen.modelData
-                primary: perScreen.modelData.name === root.primaryScreen
                 panelWindow: panel
             }
         }
