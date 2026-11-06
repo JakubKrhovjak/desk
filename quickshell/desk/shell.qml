@@ -38,6 +38,13 @@ ShellRoot {
 
     Component.onCompleted: Quickshell.execDetached([`${Quickshell.env("HOME")}/.config/desk/toolbox-tray.sh`])
 
+    // Ikony Simpleton v barvách schématu; nové barvy se v běžícím shellu ukážou až po jeho restartu
+    FileView {
+        path: `${Quickshell.env("HOME")}/.local/state/caelestia/scheme.json`
+        watchChanges: true
+        onFileChanged: Quickshell.execDetached([`${Quickshell.env("HOME")}/.config/desk/recolor-icons.sh`])
+    }
+
     Binding {
         target: ShellState
         property: "shellRoot"

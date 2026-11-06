@@ -62,12 +62,8 @@ Item {
 
     function restore(toplevel: var): void {
         const workspace = toplevel.monitor?.activeWorkspace?.id ?? monitor?.activeWorkspace?.id ?? 1;
-        // Přesun a fokus musí jít v jednom příkazu: dva samostatné procesy se můžou předběhnout a okno se neukáže
-        run([
-            `hl.dispatch(hl.dsp.window.move({ workspace = ${workspace}, follow = false, window = ${target(toplevel)} }))`,
-            `hl.dispatch(hl.dsp.focus({ window = ${target(toplevel)} }))`,
-            "hl.dispatch(hl.dsp.window.bring_to_top())"
-        ]);
+        // Animaci a přesun okna řídí windows.lua a MinimizeAnimation.qml; přesun a fokus jdou v jednom kroku
+        run([`restore_minimized("0x${toplevel.address.replace(/^0x/, "")}", ${workspace})`]);
     }
 
     function close(toplevel: var): void {
@@ -89,7 +85,6 @@ Item {
 
     function activate(key: string): void {
         const group = windowsOf(key);
-        console.log("TASKLOG", Date.now() % 100000, "activate", key, "oken", group.length, "minim", group.map(t => isMinimized(t)).join(), "aktivni", Hyprland.activeToplevel?.title?.slice(0, 25)); // DOČASNÉ
         if (group.length === 0)
             launch(key);
         else

@@ -83,11 +83,13 @@ hl.window_rule({ match = { class = "^jetbrains-.*$", title = "^splash$" }, ["hyp
 -- Titulkové lišty, zkratky a ovládání oken
 require("bars")
 require("windows")
+require("window-memory").start()
 require("keyboard")
 
 -- Autostart
 hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
+    hl.exec_cmd(home .. "/.config/desk/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
     hl.exec_cmd("qs -c desk -n -d")
 
     -- Při zkoušení v okně uvnitř Plasmy (DESK_NESTED=1) se systémové služby nespouští

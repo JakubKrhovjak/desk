@@ -166,7 +166,7 @@ end)
 -- Tlačítko minimalizace v titulkové liště; okno vrátí klik v panelu.
 -- Shell si okno nejdřív vyfotí kvůli animaci (panel/MinimizeAnimation.qml) a pak zavolá finish_minimize.
 -- Když neodpoví, okno se schová samo bez animace.
-local minimize_fallback_ms = 300
+local minimize_fallback_ms = 800
 local pending_minimize = {}
 local minimize_timers = {}
 
@@ -188,6 +188,29 @@ function minimize_active()
     pending_minimize[address] = true
     hl.exec_cmd(string.format("qs -c desk ipc call minimize animate %s %d %d %d %d", address, win.at.x, win.at.y, win.size.x, win.size.y))
     minimize_timers[address] = hl.timer(function() finish_minimize(address) end, { timeout = minimize_fallback_ms, type = "oneshot" })
+end
+
+-- Obnovení z panelu: shell přehraje animaci a na jejím konci zavolá finish_restore; pojistka vrátí okno i bez animace
+local restore_fallback_ms = 900
+local pending_restore = {}
+
+function finish_restore(address)
+    local workspace = pending_restore[address]
+    if not workspace then return end
+    pending_restore[address] = nil
+
+    local target = "address:" .. address
+    hl.dispatch(hl.dsp.window.move({ workspace = workspace, follow = false, window = target }))
+    hl.dispatch(hl.dsp.focus({ window = target }))
+    hl.dispatch(hl.dsp.window.bring_to_top())
+end
+
+function restore_minimized(address, workspace)
+    if pending_restore[address] then return end
+
+    pending_restore[address] = workspace
+    hl.exec_cmd("qs -c desk ipc call minimize restore " .. address)
+    hl.timer(function() finish_restore(address) end, { timeout = restore_fallback_ms, type = "oneshot" })
 end
 
 hl.on("workspace.special_active", hide_minimized)
@@ -309,6 +332,27 @@ local home_places = {
 }
 
 -- Každé okno se umístí jen jednou. Okna otevřená před načtením konfigurace se nepřesouvají.
+-- Pravidla platí už při vzniku okna, takže okno neproblikne jinde a nepřeskakuje mezi monitory.
+-- place_on_open pak jen doladí přesné rozměry. DP-1 nemá panel, proto stačí počítat s lištou a mezerou.
+local half_width = "((monitor_w-" .. (2 * outer_gap + snap_gap) .. ")/2)"
+local half_height = "(monitor_h-" .. (2 * outer_gap + bar_height) .. ")"
+local half_size = half_width .. " " .. half_height
+
+hl.window_rule({
+    match = { class = "^com\\.mitchellh\\.ghostty$", initial_title = "^Ghostty$" },
+    monitor = "DP-1",
+    size = half_size,
+    move = "(monitor_w-" .. outer_gap .. "-" .. half_width .. ") " .. (outer_gap + bar_height),
+})
+hl.window_rule({
+    match = { class = "^org\\.quickshell$", title = "^Files$" },
+    monitor = "DP-1",
+    size = half_size,
+    move = outer_gap .. " " .. (outer_gap + bar_height),
+})
+hl.window_rule({ match = { class = "^jetbrains-idea$" }, monitor = "HDMI-A-1" })
+hl.window_rule({ match = { class = "^jetbrains-toolbox$" }, monitor = "HDMI-A-1" })
+
 local placed = {}
 for _, win in ipairs(hl.get_windows()) do
     placed[win.address] = true
@@ -316,6 +360,12 @@ end
 
 local function place_on_open(win)
     if placed[win.address] then return end
+
+    -- Zapamatovaná poloha má přednost, výchozí místo platí jen při prvním otevření aplikace
+    if require("window-memory").has(win) then
+        placed[win.address] = true
+        return
+    end
 
     for _, place in ipairs(home_places) do
         if place.matches(win) then
