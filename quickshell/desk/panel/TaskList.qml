@@ -62,7 +62,7 @@ Item {
 
     function restore(toplevel: var): void {
         const workspace = toplevel.monitor?.activeWorkspace?.id ?? monitor?.activeWorkspace?.id ?? 1;
-        // Animaci a přesun okna řídí windows.lua a MinimizeAnimation.qml; přesun a fokus jdou v jednom kroku
+        // Animaci a přesun okna řídí minimize.lua a MinimizeAnimation.qml; přesun a fokus jdou v jednom kroku
         run([`restore_minimized("0x${toplevel.address.replace(/^0x/, "")}", ${workspace})`]);
     }
 

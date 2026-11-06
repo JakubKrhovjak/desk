@@ -1,0 +1,84 @@
+-- Výpočty poloh a stav oken, které používají ostatní moduly.
+local config = require("config")
+
+local snap_gap = config.gaps.windows
+local outer_gap = config.gaps.edge
+local bar_height = require("bars").height
+
+local function snap_rect(side, x, y, w, h)
+    local half_w = math.floor((w - snap_gap) / 2)
+    local half_h = math.floor((h - snap_gap) / 2)
+
+    return ({
+        left  = { x = x, y = y, w = half_w, h = h },
+        right = { x = x + w - half_w, y = y, w = half_w, h = h },
+        up    = { x = x, y = y, w = w, h = half_h },
+        down  = { x = x, y = y + h - half_h, w = w, h = half_h },
+    })[side]
+end
+
+-- Pracovní plocha monitoru bez panelu a s mezerou kolem
+local function monitor_snap_rect(mon, side)
+    local res = mon.reserved
+
+    local rect = snap_rect(
+        side,
+        mon.x + res.left + outer_gap,
+        mon.y + res.top + outer_gap,
+        math.floor(mon.width / mon.scale - res.left - res.right - 2 * outer_gap),
+        math.floor(mon.height / mon.scale - res.top - res.bottom - 2 * outer_gap)
+    )
+
+    -- Titulková lišta je nad oknem a počítá se do zabrané plochy
+    return { x = rect.x, y = rect.y + bar_height, w = rect.w, h = rect.h - bar_height }
+end
+
+local function is_at(win, rect)
+    return win.floating
+        and math.abs(win.at.x - rect.x) <= 2 and math.abs(win.at.y - rect.y) <= 2
+        and math.abs(win.size.x - rect.w) <= 2 and math.abs(win.size.y - rect.h) <= 2
+end
+
+local function neighbour_monitor(mon, side)
+    local right_edge = mon.x + mon.width / mon.scale
+
+    for _, other in ipairs(hl.get_monitors()) do
+        local other_right = other.x + other.width / other.scale
+        if (side == "right" and other.x == right_edge) or (side == "left" and other_right == mon.x) then
+            return other
+        end
+    end
+end
+
+local function apply_rect(win, x, y, w, h)
+    hl.dispatch(hl.dsp.window.resize({ x = w, y = h, relative = false, window = win }))
+    hl.dispatch(hl.dsp.window.move({ x = x, y = y, relative = false, window = win }))
+end
+
+-- Celá pracovní plocha monitoru přesně po panel, bez mezery
+local function maximized_rect(mon)
+    local res = mon.reserved
+
+    return {
+        x = mon.x + res.left,
+        y = mon.y + res.top + bar_height,
+        w = math.floor(mon.width / mon.scale - res.left - res.right),
+        h = math.floor(mon.height / mon.scale - res.top - res.bottom) - bar_height,
+    }
+end
+
+local function is_visible(win)
+    local mon = win.monitor
+    return win.mapped and not win.hidden and win.workspace and mon
+        and (win.pinned or (mon.active_workspace and win.workspace.id == mon.active_workspace.id))
+end
+
+return {
+    bar_height = bar_height,
+    monitor_snap_rect = monitor_snap_rect,
+    maximized_rect = maximized_rect,
+    is_at = is_at,
+    neighbour_monitor = neighbour_monitor,
+    apply_rect = apply_rect,
+    is_visible = is_visible,
+}

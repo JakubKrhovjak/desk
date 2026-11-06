@@ -10,7 +10,7 @@ import qs.components.containers
 import qs.services
 
 // Nabídka okna po pravém kliku na titulkovou lištu: připnutí navrch a ovládání okna.
-// Vyvolává ji windows.lua přes IPC, protože lišta je kreslená pluginem v Hyprlandu.
+// Vyvolává ji keybinds.lua přes IPC, protože lišta je kreslená pluginem v Hyprlandu.
 Scope {
     id: root
 

@@ -83,9 +83,13 @@ hl.window_rule({ match = { class = "^jetbrains-.*$" }, opaque = true })
 hl.window_rule({ match = { class = config.exact_match(config.classes.toolbox) }, ["hyprbars:no_bar"] = true })
 hl.window_rule({ match = { class = "^jetbrains-.*$", title = "^splash$" }, ["hyprbars:no_bar"] = true }) -- úvodní obrazovka IDE není normální okno
 
--- Titulkové lišty, zkratky a ovládání oken
+-- Titulkové lišty, chování oken a zkratky; paměť oken až za výchozími místy, aby je její pravidla přebila
 require("bars")
-require("windows")
+require("minimize")
+require("toolbox")
+require("placement")
+require("keybinds")
+require("window-behavior")
 require("window-memory").start()
 require("keyboard")
 
