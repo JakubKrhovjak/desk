@@ -198,16 +198,24 @@ local restore_fallback_ms = 900
 local pending_restore = {}
 local restore_timers = {}
 
+-- Jediné místo, které vrací okno dopředu, volá se i ze shellu. Se zadanou plochou okno nejdřív přesune z minimalizace:
+-- pořadí je důležité, fokus na okno ve skryté ploše by otevřel celou plochu.
+function restore_window(address, workspace)
+    local target = "address:" .. address
+    if workspace then
+        hl.dispatch(hl.dsp.window.move({ workspace = workspace, follow = false, window = target }))
+    end
+    hl.dispatch(hl.dsp.focus({ window = target }))
+    hl.dispatch(hl.dsp.window.bring_to_top())
+end
+
 function finish_restore(address)
     local workspace = pending_restore[address]
     if not workspace then return end
     pending_restore[address] = nil
     restore_timers[address] = nil
 
-    local target = "address:" .. address
-    hl.dispatch(hl.dsp.window.move({ workspace = workspace, follow = false, window = target }))
-    hl.dispatch(hl.dsp.focus({ window = target }))
-    hl.dispatch(hl.dsp.window.bring_to_top())
+    restore_window(address, workspace)
 end
 
 function restore_minimized(address, workspace)
@@ -290,12 +298,8 @@ local function terminal_shortcut()
         return
     end
 
-    -- Minimalizovaný terminál se nejdřív vrátí na aktuální plochu
-    if terminal.workspace and terminal.workspace.name == minimized_workspace then
-        hl.dispatch(hl.dsp.window.move({ workspace = hl.get_active_monitor().active_workspace.id, follow = false, window = terminal }))
-    end
-    hl.dispatch(hl.dsp.focus({ window = terminal }))
-    hl.dispatch(hl.dsp.window.bring_to_top())
+    local minimized = terminal.workspace and terminal.workspace.name == minimized_workspace
+    restore_window(terminal.address, minimized and hl.get_active_monitor().active_workspace.id or nil)
 end
 
 -- Výchozí místo aplikací při otevření. IntelliJ se pozná až podle titulku s projektem,
@@ -310,6 +314,25 @@ local function toolbox_rect(mon, win)
     }
 end
 
+-- Půlka vedlejšího monitoru (nemá panel, proto stačí počítat s lištou a mezerou). Z jednoho popisu vznikne
+-- pravidlo pro vznik okna i přesný rozměr pro place_on_open, aby se obojí nemohlo rozejít.
+local function half_of_side_monitor(class, title_field, title, side)
+    local half_width = "((monitor_w-" .. (2 * outer_gap + snap_gap) .. ")/2)"
+    local half_height = "(monitor_h-" .. (2 * outer_gap + bar_height) .. ")"
+    local x = side == "left" and tostring(outer_gap) or "(monitor_w-" .. outer_gap .. "-" .. half_width .. ")"
+
+    return {
+        matches = function(win) return win.class == class and win[title_field] == title end,
+        monitor = config.monitors.side,
+        rect = function(mon) return monitor_snap_rect(mon, side) end,
+        rule = {
+            match = { class = config.exact_match(class), [title_field] = config.exact_match(title) },
+            size = half_width .. " " .. half_height,
+            move = x .. " " .. (outer_gap + bar_height),
+        },
+    }
+end
+
 local home_places = {
     {
         matches = function(win)
@@ -317,47 +340,26 @@ local home_places = {
         end,
         monitor = config.monitors.main,
         rect = maximized_rect,
+        rule = { match = { class = config.exact_match(config.classes.idea) } },
     },
-    {
-        matches = function(win) return win.class == terminal_class and win.initial_title == "Ghostty" end,
-        monitor = config.monitors.side,
-        rect = function(mon) return monitor_snap_rect(mon, "right") end,
-    },
-    {
-        matches = function(win) return win.class == config.classes.shell and win.title == "Files" end,
-        monitor = config.monitors.side,
-        rect = function(mon) return monitor_snap_rect(mon, "left") end,
-    },
+    half_of_side_monitor(terminal_class, "initial_title", "Ghostty", "right"),
+    half_of_side_monitor(config.classes.shell, "title", "Files", "left"),
     {
         -- Toolbox se sám otevírá na y = 0, pod panelem; patří vpravo nahoře pod panel a velikost si drží svou
         matches = function(win) return win.class == config.classes.toolbox end,
         monitor = config.monitors.main,
         rect = toolbox_rect,
+        rule = { match = { class = config.exact_match(config.classes.toolbox) } },
     },
 }
 
+-- Pravidla platí už při vzniku okna, takže okno neproblikne jinde a nepřeskakuje mezi monitory
+for _, place in ipairs(home_places) do
+    place.rule.monitor = place.monitor
+    hl.window_rule(place.rule)
+end
+
 -- Každé okno se umístí jen jednou. Okna otevřená před načtením konfigurace se nepřesouvají.
--- Pravidla platí už při vzniku okna, takže okno neproblikne jinde a nepřeskakuje mezi monitory.
--- place_on_open pak jen doladí přesné rozměry. Vedlejší monitor nemá panel, proto stačí počítat s lištou a mezerou.
-local half_width = "((monitor_w-" .. (2 * outer_gap + snap_gap) .. ")/2)"
-local half_height = "(monitor_h-" .. (2 * outer_gap + bar_height) .. ")"
-local half_size = half_width .. " " .. half_height
-
-hl.window_rule({
-    match = { class = config.exact_match(terminal_class), initial_title = "^Ghostty$" },
-    monitor = config.monitors.side,
-    size = half_size,
-    move = "(monitor_w-" .. outer_gap .. "-" .. half_width .. ") " .. (outer_gap + bar_height),
-})
-hl.window_rule({
-    match = { class = config.exact_match(config.classes.shell), title = "^Files$" },
-    monitor = config.monitors.side,
-    size = half_size,
-    move = outer_gap .. " " .. (outer_gap + bar_height),
-})
-hl.window_rule({ match = { class = config.exact_match(config.classes.idea) }, monitor = config.monitors.main })
-hl.window_rule({ match = { class = config.exact_match(config.classes.toolbox) }, monitor = config.monitors.main })
-
 local placed = {}
 for _, win in ipairs(hl.get_windows()) do
     placed[win.address] = true
