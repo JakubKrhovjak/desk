@@ -1,1 +1,1 @@
-{"enabled":false,"temperature":6000,"scheduleEnabled":true,"scheduleMode":"sun","scheduleFrom":"21:00","scheduleTo":"02:00"}
+{"enabled":false,"temperature":6000,"scheduleEnabled":true,"scheduleMode":"custom","scheduleFrom":"21:00","scheduleTo":"02:00"}

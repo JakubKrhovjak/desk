@@ -8,7 +8,9 @@
 #          desk-update --snapshot jen uložení do gitu
 set -uo pipefail
 
-desk_git=(git --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
+desk_git=(git -C "$HOME/.config" --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
+# Výčet je tady, ne jen v info/exclude: ten se neklonuje a na novém stroji by add -A poslal do veřejného repa celý ~/.config
+desk_paths=(desk quickshell/desk quickshell/caelestia .gitmodules ghostty/config)
 caelestia_dir="$HOME/.config/quickshell/caelestia"
 caelestia_git=(git -C "$caelestia_dir")
 caelestia_system=/etc/xdg/quickshell/caelestia
@@ -20,23 +22,24 @@ say() { printf '\n==> %s\n' "$*"; }
 warn() { printf '\n!!! %s\n' "$*" >&2; }
 version_of() { pacman -Q "$1" 2>/dev/null | cut -d' ' -f2; }
 
-save_repo() { # $1 = popis, zbytek = příkaz gitu
-    local label=$1
-    shift
-    "$@" add -A || return 1
+save_repo() { # $1 = popis, $2 = větve k pushnutí, zbytek = příkaz gitu; změny už musí být v indexu
+    local label=$1 refs=$2
+    shift 2
     if ! "$@" diff --cached --quiet; then
         "$@" commit -q -m "Snapshot $(date '+%Y-%m-%d %H:%M')" && say "$label: uložen nový stav"
     fi
     if "$@" remote get-url origin >/dev/null 2>&1; then
-        "$@" push -q origin HEAD || warn "$label: push selhal, stav je uložený jen lokálně"
+        # shellcheck disable=SC2086 # refs je záměrně seznam oddělený mezerami
+        "$@" push -q origin $refs || warn "$label: push selhal, stav je uložený jen lokálně"
     fi
 }
 
 snapshot() {
     mkdir -p "$desk_dir/system/keyd"
     cp /etc/keyd/*.conf /etc/keyd/desk-cmd "$desk_dir/system/keyd/" 2>/dev/null
-    save_repo "desk" "${desk_git[@]}"
-    save_repo "caelestia" "${caelestia_git[@]}"
+    # Caelestia první: desk si v submodulu ukládá její commit, který už musí existovat i na GitHubu
+    "${caelestia_git[@]}" add -A && save_repo "caelestia" "HEAD upstream" "${caelestia_git[@]}"
+    "${desk_git[@]}" add -A -- "${desk_paths[@]}" && save_repo "desk" "HEAD" "${desk_git[@]}"
 }
 
 rebuild_hyprbars() {
