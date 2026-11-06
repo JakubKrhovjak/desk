@@ -5,7 +5,7 @@ set -uo pipefail
 
 theme="$HOME/.local/share/icons/Simpleton"
 apps="$theme/scalable/apps"
-scheme="$HOME/.local/state/caelestia/scheme.json"
+scheme="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
 
 colour_of() { jq -r --arg name "$1" '(.colours // .)[$name] // empty' "$scheme"; }
 

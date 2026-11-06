@@ -15,7 +15,7 @@ The repository's work tree is `~/.config`, and only the paths listed in `desk_pa
 | `quickshell/caelestia/` | Submodule with the patched Caelestia copy |
 | `ghostty/config` | Terminal config |
 
-Panel and Night Shift state lives outside git, in `~/.local/state/desk`.
+Panel pins and order, Night Shift settings and window positions live outside git, in `~/.local/state/desk`. They have no backup, so a fresh install starts with defaults.
 
 ## Install
 
@@ -41,6 +41,8 @@ The script installs missing packages, prepares the submodule branches, builds th
 - Keyboards: `desk/system/keyd/` is written for specific devices.
 - Startup apps: `desk/autostart.json` holds absolute paths and can be edited in Nexus (Apps → app → Startup).
 - Icons: the Simpleton theme in `~/.local/share/icons` is not part of this repository.
+- Colours: until Caelestia generates its scheme, Hyprland uses fallback colours from `desk/colours.lua`.
+- Not restored from this repository: `~/.config/caelestia/shell.json`, `~/.config/caelestia/hypr-user.lua` and the `macOS Cmd` keymap for IntelliJ IDEA.
 
 ## Updating
 
@@ -48,7 +50,9 @@ The script installs missing packages, prepares the submodule branches, builds th
 desk-update
 ```
 
-It commits and pushes the current state, runs `yay -Syu`, rebuilds `hyprbars` after a Hyprland update and merges new Caelestia releases into the patched copy.
+It commits and pushes the current state, runs `yay -Syu`, rebuilds `hyprbars` when it doesn't match the installed Hyprland and merges the installed Caelestia release into the patched copy. Both steps go by the current state, so they also catch up after a failed `yay` or an update run outside this script. A commit that looks like it contains a secret is refused.
+
+The keyd config in `desk/system/keyd/` is the source of truth. `desk-update` only warns when `/etc/keyd` differs, and `desk/system/install-keyd.sh` applies the repository copy.
 
 Caelestia uses a vendor branch: `upstream` holds clean releases and `master` holds them with my changes. If a merge conflicts, it is aborted and the copy stays as it was, so you can resolve it by hand with `git -C ~/.config/quickshell/caelestia merge upstream`.
 

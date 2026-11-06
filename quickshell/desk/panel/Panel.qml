@@ -42,6 +42,8 @@ StyledWindow {
     // Spoušť dashboardu: horní okraj obrazovky uprostřed; otevřený dashboard drží celá výška panelu nad ním
     readonly property bool dashboardTriggered: dashboardHold.hovered && dashboardHold.point.position.y < 3
     readonly property bool dashboardHeld: dashboardHold.hovered
+    // Šířka dashboardu, než se poprvé načte
+    readonly property int dashboardWidth: 854
 
     // Název vyskakovacího panelu pod myší a střed jeho ikony
     readonly property string statusHover: statusRow.dragging ? "" : keyboardButton.hovered ? "kblayout" : networkButton.hovered ? "network" : bluetoothButton.hovered ? "bluetooth" : volumeButton.hovered ? "audio" : ""
@@ -59,7 +61,7 @@ StyledWindow {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: 854
+        width: root.dashboardWidth
 
         HoverHandler {
             id: dashboardHold

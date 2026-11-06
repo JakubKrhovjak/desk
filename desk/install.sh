@@ -38,13 +38,14 @@ setup_exclude() {
 }
 
 setup_user() {
-    say "Příkaz desk-update a stavová složka"
-    mkdir -p "$HOME/.local/bin" "${XDG_STATE_HOME:-$HOME/.local/state}/desk"
+    say "Příkaz desk-update"
+    mkdir -p "$HOME/.local/bin"
     ln -sfn "$desk_dir/desk-update.sh" "$HOME/.local/bin/desk-update"
     if [ -x "$desk_dir/plugins/hyprbars.so" ]; then
         say "hyprbars už je zkompilovaný"
     else
-        "$desk_dir/desk-update.sh" --hyprbars
+        # Bez pluginu jsou okna jen bez lišt, zbytek instalace na něm nezávisí
+        "$desk_dir/desk-update.sh" --hyprbars || say "hyprbars se nepodařilo zkompilovat, později stačí spustit desk-update --hyprbars"
     fi
 }
 

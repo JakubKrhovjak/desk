@@ -9,6 +9,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.modules.bar.popouts as BarPopouts
+import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.nexus
 import qs.modules.notifications as Notifications
@@ -133,7 +134,7 @@ StyledWindow {
 
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        width: dash.implicitWidth || 854
+        width: dash.implicitWidth || root.panelWindow.dashboardWidth
         height: root.screenState?.dashboard ? dash.implicitHeight : 0
 
         HoverHandler {
@@ -153,9 +154,10 @@ StyledWindow {
         bottomRightRadius: Tokens.rounding.extraLarge
     }
 
-    DashWrapper {
+    Dashboard.Wrapper {
         id: dash
 
+        keepLoaded: true
         screenState: root.screenState
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter

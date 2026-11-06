@@ -4,7 +4,7 @@ package.path = package.path .. ";" .. home .. "/.config/desk/?.lua;" .. home .. 
 
 local config = require("config")
 
-local scheme = require("scheme.current")
+local scheme = require("colours")
 local cursor_theme = "breeze_cursors"
 local cursor_size = 24
 
@@ -31,7 +31,11 @@ hl.env("XDG_CURRENT_DESKTOP", "Hyprland")
 hl.env("XDG_SESSION_TYPE", "wayland")
 hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.env("_JAVA_AWT_WM_NONREPARENTING", "1")
-hl.env("DESK_MAIN_MONITOR", config.monitors.main) -- pro shell.qml
+-- Sdílené hodnoty pro shell a skripty, config.lua je jejich jediný domov
+hl.env("DESK_MAIN_MONITOR", config.monitors.main)
+hl.env("DESK_DIR", config.dir)
+hl.env("DESK_STATE_DIR", config.state_dir)
+hl.env("DESK_MINIMIZED_WORKSPACE", config.minimized_workspace)
 
 -- Vzhled a chování oken
 hl.config({
@@ -95,7 +99,6 @@ require("keyboard")
 
 -- Autostart
 hl.on("hyprland.start", function()
-    os.execute("mkdir -p '" .. config.state_dir .. "'") -- shell i nightshift.sh v ní hledají stav hned po startu
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
     hl.exec_cmd(config.dir .. "/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
     hl.exec_cmd("qs -c desk -n -d")

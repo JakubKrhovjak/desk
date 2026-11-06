@@ -11,7 +11,7 @@ while [ "$attempts" -lt 60 ] && ! busctl --user status org.kde.StatusNotifierWat
     attempts=$((attempts + 1))
 done
 
-# Skrytý start: okno se otevře ve special:minimized, odkud ho vrátí klik v panelu.
+# Skrytý start: okno se otevře na skryté ploše minimalizovaných oken, odkud ho vrátí klik v panelu.
 # Toolbox umí vlastní přepínač a žádné okno neotevře.
 tab=$(printf '\t')
 jq -r 'to_entries[]
@@ -19,6 +19,6 @@ jq -r 'to_entries[]
     | "\(if .value.tray and ($own_flag | not) then "hidden" else "normal" end)\t\(.value.command + (if $own_flag then ["--minimize"] else [] end) | @sh)"' "$config" |
     while IFS="$tab" read -r mode command; do
         rules=""
-        [ "$mode" = "hidden" ] && rules=", { workspace = 'special:minimized silent' }"
+        [ "$mode" = "hidden" ] && rules=", { workspace = '$DESK_MINIMIZED_WORKSPACE silent' }"
         hyprctl eval "hl.dispatch(hl.dsp.exec_cmd([==[$command]==]$rules))" >/dev/null
     done

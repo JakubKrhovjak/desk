@@ -13,8 +13,8 @@ local apply_rect = geometry.apply_rect
 local terminal_class = config.classes.terminal
 
 -- IntelliJ se pozná až podle titulku s projektem, aby se nemaximalizovaly i jeho dialogy (mají stejnou třídu okna).
--- Půlka vedlejšího monitoru (nemá panel, proto stačí počítat s lištou a mezerou). Z jednoho popisu vznikne
--- pravidlo pro vznik okna i přesný rozměr pro place_on_open, aby se obojí nemohlo rozejít.
+-- Půlka vedlejšího monitoru (nemá panel, proto stačí počítat s lištou a mezerou). Pravidlo pro vznik okna
+-- počítá tvar sám, přesný rozměr pro place_on_open dává monitor_snap_rect; změna v jednom patří i do druhého.
 local function half_of_side_monitor(class, title_field, title, side)
     local half_width = "((monitor_w-" .. (2 * outer_gap + snap_gap) .. ")/2)"
     local half_height = "(monitor_h-" .. (2 * outer_gap + bar_height) .. ")"

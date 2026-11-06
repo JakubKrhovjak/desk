@@ -16,6 +16,7 @@ import Quickshell
 import Quickshell.Io
 import qs.components.filedialog
 import qs.services
+import qs.utils
 import qs.modules.nexus
 
 ShellRoot {
@@ -41,7 +42,7 @@ ShellRoot {
 
     // Ikony Simpleton v barvách schématu; nové barvy se v běžícím shellu ukážou až po jeho restartu
     FileView {
-        path: `${Quickshell.env("HOME")}/.local/state/caelestia/scheme.json`
+        path: `${Paths.state}/scheme.json`
         watchChanges: true
         onFileChanged: Quickshell.execDetached([`${ShellEnv.deskDir}/recolor-icons.sh`])
     }

@@ -10,7 +10,7 @@ if not loaded or not (hl.plugin.hyprbars and hl.plugin.hyprbars.add_button) then
     return bars
 end
 
-local scheme = require("scheme.current")
+local scheme = require("colours")
 
 bars.height = 30
 

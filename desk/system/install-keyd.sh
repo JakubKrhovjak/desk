@@ -26,5 +26,8 @@ done
 sudo keyd check
 # keyd reload může spadnout a smazat vazby, proto restart a nové nastavení režimu
 sudo systemctl restart keyd
-"$(dirname "$source_dir")/../keyd-mode.sh" base
+# Režim Command patří jen do běžícího desk, Plasma ho nesmí zdědit
+if pgrep -xa qs | grep -q 'qs -c desk'; then
+    "$(dirname "$source_dir")/../keyd-mode.sh" base
+fi
 echo "konfigurace keyd je nainstalovaná"

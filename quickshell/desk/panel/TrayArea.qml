@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import Caelestia.Config
+import qs.components
 import qs.services
 import qs.utils
 
@@ -64,14 +65,14 @@ Row {
                 width: Math.max(14, badgeText.implicitWidth + 6)
                 height: 14
                 radius: 7
-                color: "#e5383b"
+                color: Colours.palette.m3error
 
-                Text {
+                StyledText {
                     id: badgeText
 
                     anchors.centerIn: parent
                     text: parent.label
-                    color: "#ffffff"
+                    color: Colours.palette.m3onError
                     font.pixelSize: 10
                     font.weight: Font.Bold
                 }

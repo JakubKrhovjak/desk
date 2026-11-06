@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import qs.components
 
 // Vodorovný řádek položek SortItem, které jde přeuspořádat tažením myší.
