@@ -15,8 +15,9 @@ import qs.modules.nexus
 import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.sidebar as Sidebar
+import qs.modules.utilities as Utilities
 
-// Vrstva nad plochou, sahá po panel: nabídka aplikací, notifikace, nabídka vypnutí a dashboard shora.
+// Vrstva nad plochou, sahá po panel: nabídka aplikací, notifikace, nabídka vypnutí, dashboard shora a utilities v rohu.
 StyledWindow {
     id: root
 
@@ -48,6 +49,7 @@ StyledWindow {
         screenState.launcher = false;
         screenState.session = false;
         screenState.dashboard = false;
+        screenState.utilities = false;
         popouts.close();
     }
 
@@ -59,6 +61,9 @@ StyledWindow {
         Region { item: notifsBg.visible ? notifsBg : null }
         Region { item: sessionBg.visible ? sessionBg : null }
         Region { item: sidebarBg.visible ? sidebarBg : null }
+        // Nad hrou na celou obrazovku by pruh bral myš aplikaci
+        Region { item: root.hasFullscreen ? null : utilitiesZone }
+        Region { item: utilitiesBg.visible ? utilitiesBg : null }
     }
 
     // Klik mimo zavře otevřený panel; horní panel zůstává klikací, aby tlačítko umělo i zavřít
@@ -219,7 +224,8 @@ StyledWindow {
     }
 
     HoldTimer {
-        held: root.notificationsHovered || sidebarBgHover.hovered || sidebarContentHover.hovered
+        // Utilities se při otevřené historii ukazují přímo pod ní, přejezd na ně ji nesmí zavřít
+        held: root.notificationsHovered || sidebarBgHover.hovered || sidebarContentHover.hovered || utilitiesBgHover.hovered || utilitiesContentHover.hovered
         interval: 400
         onTriggered: {
             if (root.screenState && !root.sidebarPinned)
@@ -331,7 +337,7 @@ StyledWindow {
         sidebarPanel: sidebar
         osdPanel: absentPanel
         sessionPanel: session
-        utilitiesPanel: absentPanel
+        utilitiesPanel: utilities
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -370,6 +376,66 @@ StyledWindow {
         }
 
         anchors.top: notifs.bottom
+        anchors.bottom: utilities.top
+        anchors.right: parent.right
+    }
+
+    // Utilities: najetí myší do pravého dolního rohu vysune rychlé přepínače a nahrávání obrazovky
+    Item {
+        id: utilitiesZone
+
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        width: Tokens.sizes.utilities.width
+        height: 3
+
+        HoverHandler {
+            id: utilitiesZoneHover
+
+            onHoveredChanged: {
+                if (hovered && root.screenState && !root.hasFullscreen)
+                    root.screenState.utilities = true;
+            }
+        }
+    }
+
+    HoldTimer {
+        held: utilitiesZoneHover.hovered || utilitiesBgHover.hovered || utilitiesContentHover.hovered
+        interval: 300
+        onTriggered: {
+            if (root.screenState)
+                root.screenState.utilities = false;
+        }
+    }
+
+    StyledRect {
+        id: utilitiesBg
+
+        x: utilities.x
+        y: utilities.y
+        width: utilities.width
+        height: utilities.height
+        visible: utilities.visible
+        opacity: utilities.opacity
+        color: Colours.tPalette.m3surface
+        topLeftRadius: Tokens.rounding.extraLarge
+
+        HoverHandler {
+            id: utilitiesBgHover
+        }
+    }
+
+    Utilities.Wrapper {
+        id: utilities
+
+        screenState: root.screenState
+        sidebar: sidebar
+        popouts: popoutsWrapper
+
+        HoverHandler {
+            id: utilitiesContentHover
+        }
+
         anchors.bottom: parent.bottom
         anchors.right: parent.right
     }

@@ -37,7 +37,7 @@ The script installs missing packages, prepares the submodule branches, builds th
 
 ### Manual steps
 
-- Monitor names: `monitors` in `desk/config.lua`.
+- Monitors: the Displays page in Nexus. It writes `desk/monitor-settings.lua` and goes back on its own unless you keep the changes.
 - Keyboards: `desk/system/keyd/` is written for specific devices.
 - Startup apps: `desk/autostart.json` can be edited in Nexus (Apps → app → Startup). A leading `~/` in a command is expanded.
 - Icons: the Simpleton theme in `~/.local/share/icons` is not part of this repository.
@@ -46,7 +46,7 @@ The script installs missing packages, prepares the submodule branches, builds th
 
 ## Panel
 
-Panel height and icon size are set in Nexus (Top panel), or by right-clicking the panel. They are stored in `desk/panel-settings.json`.
+Panel height and icon size are set in Nexus (Panels), or by right-clicking the panel. They are stored in `desk/panel-settings.json`.
 
 An app with a tray icon lives only in the tray, unless you pin it to the panel. Clicking its icon shows or hides the window, and the close button in the title bar only hides it. `Super + Q` always closes the window.
 

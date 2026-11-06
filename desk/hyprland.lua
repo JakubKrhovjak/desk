@@ -10,8 +10,20 @@ local cursor_size = 24
 
 -- Monitory
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
-hl.monitor({ output = config.monitors.main, mode = "2560x1440@144", position = "0x0", scale = 1 })
-hl.monitor({ output = config.monitors.side, mode = "2560x1440@165", position = "2560x0", scale = 1 })
+for _, output in ipairs(config.monitors.outputs) do
+    -- Neúplný záznam přeskočí, monitor pak dostane výchozí pravidlo výše
+    if output.disabled and output.name then
+        hl.monitor({ output = output.name, disabled = true })
+    elseif output.name and output.mode and tonumber(output.x) and tonumber(output.y) then
+        hl.monitor({
+            output = output.name,
+            mode = output.mode,
+            position = output.x .. "x" .. output.y,
+            scale = output.scale or 1,
+            transform = output.transform or 0,
+        })
+    end
+end
 
 hl.workspace_rule({ workspace = "1", monitor = config.monitors.main, default = true, persistent = true })
 hl.workspace_rule({ workspace = "2", monitor = config.monitors.side, default = true, persistent = true })

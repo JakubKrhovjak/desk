@@ -23,7 +23,7 @@ ShellRoot {
     id: root
 
     // Panel a vše k němu patřící jen na hlavním monitoru
-    readonly property string primaryScreen: Screens.screens.some(s => s.name === Quickshell.env("DESK_MAIN_MONITOR")) ? Quickshell.env("DESK_MAIN_MONITOR") : (Screens.screens[0]?.name ?? "")
+    readonly property string primaryScreen: Screens.screens.some(s => s.name === ShellEnv.mainMonitor) ? ShellEnv.mainMonitor : (Screens.screens[0]?.name ?? "")
 
     settings.watchFiles: false
 
@@ -35,6 +35,15 @@ ShellRoot {
 
         function open(): void {
             WindowFactory.openPage("nightshift");
+        }
+    }
+
+    // Otevře stránku Nastavení podle id z PageRegistry
+    IpcHandler {
+        target: "settings"
+
+        function open(page: string): void {
+            WindowFactory.openPage(page);
         }
     }
 

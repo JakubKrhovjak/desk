@@ -2,15 +2,21 @@
 local home = os.getenv("HOME")
 local xdg_state = os.getenv("XDG_STATE_HOME")
 
+-- Soubor se přepisuje za běhu a je ve verzovacím systému; chyba v něm nesmí vzít přihlášení, jako u colours.lua
+local function load_monitors()
+    local loaded, monitors = pcall(require, "monitor-settings")
+    local valid = loaded and type(monitors) == "table" and type(monitors.main) == "string"
+        and type(monitors.side) == "string" and type(monitors.outputs) == "table"
+    return valid and monitors or { main = "HDMI-A-1", side = "DP-1", outputs = {} }
+end
+
 local config = {
     dir = home .. "/.config/desk",
     -- Výchozí kopie pro běh mimo session jsou v nightshift.sh a ShellEnv.qml
     state_dir = (xdg_state ~= "" and xdg_state or home .. "/.local/state") .. "/desk",
 
-    monitors = {
-        main = "HDMI-A-1", -- s panelem
-        side = "DP-1",
-    },
+    -- main je monitor s panelem; hodnoty nastavuje stránka Displays v Nastavení
+    monitors = load_monitors(),
 
     gaps = {
         windows = 10, -- mezi okny

@@ -47,12 +47,13 @@ local function fitted_rect(mon, old_top, rect)
     return { x = rect.x, y = y, w = rect.w, h = h }
 end
 
--- Volá shell po změně výšky, až když ji Hyprland převzal do mon.reserved
-function fit_windows_to_panel(old_top)
-    local mon
+local function monitor_named(name)
     for _, candidate in ipairs(hl.get_monitors()) do
-        if candidate.name == config.monitors.main then mon = candidate end
+        if candidate.name == name then return candidate end
     end
+end
+
+local function fit_monitor(mon, old_top)
     if not mon then return end
 
     for _, win in ipairs(hl.get_windows()) do
@@ -66,4 +67,22 @@ function fit_windows_to_panel(old_top)
         local fitted = fitted_rect(mon, old_top, { x = rect.x + mon.x, y = rect.y + mon.y, w = rect.w, h = rect.h })
         return { x = fitted.x - mon.x, y = fitted.y - mon.y, w = fitted.w, h = fitted.h }
     end)
+end
+
+-- Volá shell po změně výšky, až když ji Hyprland převzal do mon.reserved
+function fit_windows_to_panel(old_top)
+    fit_monitor(monitor_named(config.monitors.main), old_top)
+end
+
+-- Čas, za který nový shell po restartu zabere místo na novém hlavním monitoru
+local panel_move_delay_ms = 1500
+local panel_move_timer
+
+-- Po změně hlavního monitoru: na starém se místo uvolnilo, na novém se zabralo
+function panel_moved(old_main, panel_height)
+    panel_move_timer = hl.timer(function()
+        fit_monitor(monitor_named(old_main), panel_height)
+        fit_monitor(monitor_named(config.monitors.main), 0)
+        hl.exec_cmd("xrandr --output " .. config.monitors.main .. " --primary")
+    end, { timeout = panel_move_delay_ms, type = "oneshot" })
 end

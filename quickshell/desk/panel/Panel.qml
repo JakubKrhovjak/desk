@@ -43,7 +43,7 @@ StyledWindow {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        onClicked: event => panelMenu.openAt(event.x, [{ label: "Panel settings", action: () => WindowFactory.openPage("deskpanel") }])
+        onClicked: event => panelMenu.openAt(event.x, [{ label: "Panel settings", action: () => WindowFactory.openPage("panels") }])
     }
 
     PanelMenu {

@@ -49,8 +49,8 @@ ColumnLayout {
     StyledSlider {
         Layout.fillWidth: true
         implicitHeight: Tokens.padding.medium * 3
-        opacity: NightShiftState.active ? 1 : 0.5
-        enabled: NightShiftState.active
+        enabled: NightShiftState.temperatureEditable
+        opacity: enabled ? 1 : 0.5
 
         // Vlevo teplejší barvy, vpravo chladnější
         value: (NightShiftState.temperature - NightShiftState.warmest) / (NightShiftState.coolest - NightShiftState.warmest)
