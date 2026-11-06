@@ -111,13 +111,13 @@ StyledWindow {
             window: root
         }
 
-        // Pravá část panelu: položky jde přeuspořádat tažením, pořadí je v ~/.config/desk/panel-order.json
+        // Pravá část panelu: položky jde přeuspořádat tažením, pořadí je v panel-order.json ve stavové složce
         PanelGroup {
             SortableRow {
                 id: statusRow
 
                 height: parent.height
-                orderFile: `${ShellEnv.deskDir}/panel-order.json`
+                orderFile: `${ShellEnv.stateDir}/panel-order.json`
 
                 SortItem {
                     key: "tray"

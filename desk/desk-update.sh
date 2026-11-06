@@ -6,11 +6,12 @@
 #   4. po změně Caelestie sloučí novou verzi do kopie; při konfliktu kopii nechá beze změny.
 # Použití: desk-update            celá aktualizace
 #          desk-update --snapshot jen uložení do gitu
+#          desk-update --hyprbars jen kompilace pluginu hyprbars
 set -uo pipefail
 
 desk_git=(git -C "$HOME/.config" --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
 # Výčet je tady, ne jen v info/exclude: ten se neklonuje a na novém stroji by add -A poslal do veřejného repa celý ~/.config
-desk_paths=(desk quickshell/desk quickshell/caelestia .gitmodules ghostty/config)
+desk_paths=(README.md desk quickshell/desk quickshell/caelestia .gitmodules ghostty/config)
 caelestia_dir="$HOME/.config/quickshell/caelestia"
 caelestia_git=(git -C "$caelestia_dir")
 caelestia_system=/etc/xdg/quickshell/caelestia
@@ -43,7 +44,8 @@ snapshot() {
 }
 
 rebuild_hyprbars() {
-    say "Hyprland se změnil, kompiluji hyprbars"
+    say "Kompiluji hyprbars pro aktuální Hyprland"
+    [ -d "$plugins_src/.git" ] || git clone -q https://github.com/hyprwm/hyprland-plugins "$plugins_src" || { warn "nepodařilo se naklonovat zdroj pluginu"; return 1; }
     git -C "$plugins_src" fetch -q origin || { warn "nepodařilo se stáhnout zdroj pluginu"; return 1; }
 
     # hyprpm.toml páruje commit Hyprlandu s commitem pluginu; bez záznamu platí nejnovější verze
@@ -59,7 +61,7 @@ rebuild_hyprbars() {
         || warn "patch hyprbars nesedí na novou verzi: pravý klik na lištu nebude otevírat nabídku okna"
 
     if make -C "$plugins_src/hyprbars" all >/dev/null; then
-        install -m755 "$plugins_src/hyprbars/hyprbars.so" "$plugin_target"
+        install -Dm755 "$plugins_src/hyprbars/hyprbars.so" "$plugin_target"
         say "hyprbars zkompilován, načte se po dalším přihlášení"
     else
         warn "kompilace hyprbars selhala: okna budou bez lišt, zbytek prostředí poběží"
@@ -87,6 +89,11 @@ merge_caelestia() {
         return 1
     fi
 }
+
+if [ "${1:-}" = "--hyprbars" ]; then
+    rebuild_hyprbars
+    exit
+fi
 
 snapshot || warn "uložení do gitu selhalo"
 [ "${1:-}" = "--snapshot" ] && exit 0

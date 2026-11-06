@@ -104,7 +104,7 @@ Item {
     JsonFile {
         id: pinStore
 
-        path: `${ShellEnv.deskDir}/panel-pins.json`
+        path: `${ShellEnv.stateDir}/panel-pins.json`
         onValueLoaded: value => {
             if (Array.isArray(value))
                 root.pins = value;
@@ -122,7 +122,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        orderFile: `${ShellEnv.deskDir}/panel-tasks-order.json`
+        orderFile: `${ShellEnv.stateDir}/panel-tasks-order.json`
 
         Repeater {
             id: slots

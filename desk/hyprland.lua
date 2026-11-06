@@ -95,6 +95,7 @@ require("keyboard")
 
 -- Autostart
 hl.on("hyprland.start", function()
+    os.execute("mkdir -p '" .. config.state_dir .. "'") -- shell i nightshift.sh v ní hledají stav hned po startu
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
     hl.exec_cmd(config.dir .. "/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
     hl.exec_cmd("qs -c desk -n -d")
