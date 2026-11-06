@@ -105,6 +105,9 @@ setup_system() {
     sudo systemctl enable --now keyd
     sudo usermod -aG keyd "$USER"
     "$desk_dir/system/install-keyd.sh"
+
+    say "Přihlašovací obrazovka"
+    "$desk_dir/greeter/install.sh"
 }
 
 [ "${1:-}" = "--user-only" ] && user_only=true

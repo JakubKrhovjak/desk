@@ -55,9 +55,8 @@ def activate(season: str, mode: str) -> None:
 
 
 def wallpaper_for(season: str) -> Path:
-    if season in ("simpleton", "simpleton-test"):
-        return Path.home() / ".local/share/wallpapers/Simpleton/contents/images/3965x2645.jpg"
-    return Path(__file__).resolve().parent / "wallpapers" / f"{season}.jpg"
+    name = "simpleton" if season == "simpleton-test" else season
+    return Path(__file__).resolve().parent / "wallpapers" / f"{name}.jpg"
 
 
 # Tapeta jde až po schématu. caelestia po nastavení tapety přepočítává barvy ze schémat svého balíčku,
