@@ -33,6 +33,11 @@ find "$theme/scalable" -type f -name '*.svg' -print0 | xargs -0 sed -i -E \
     -e "s/(\.ColorScheme-Text \{ color:#)[0-9a-fA-F]{6}/\1$icon_colour/" \
     -e "s/(stop-color=\"#)[0-9a-fA-F]{6}/\1$tint_colour/g"
 
+# Ikony doplněné z Papirusu (build-icon-theme.sh): jen barva čar, jejich přechody jsou barvy typů souborů
+# Přepisuje jen soubory s touhle třídou: je jich asi pětina a skript běží při každém startu shellu
+grep -rlZ --include='*.svg' --exclude-dir=scalable 'ColorScheme-Text' "$theme" | xargs -0 -r sed -i -E \
+    -e "s/(\.ColorScheme-Text \{ color:#)[0-9a-fA-F]{6}/\1$icon_colour/"
+
 alias_icon() { # $1 = jméno, které aplikace hledá, $2 = existující ikona motivu
     [[ -e "$apps/$2.svg" && ! -e "$apps/$1.svg" ]] && ln -s "$2.svg" "$apps/$1.svg"
 }

@@ -1,7 +1,7 @@
 [Icon Theme]
 Name=Simpleton
-Comment=Breeze s jednobarevnými spouštěči na panelu
-Inherits=breeze-dark,breeze,hicolor
+Comment=Monochrome app and folder icons, the rest comes from desk/build-icon-theme.sh
+Inherits=hicolor
 Directories=scalable/apps,scalable/preferences,scalable/places
 
 [scalable/apps]
