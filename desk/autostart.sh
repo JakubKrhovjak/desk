@@ -16,9 +16,9 @@ done
 tab=$(printf '\t')
 jq -r 'to_entries[]
     | (.key == "jetbrains-toolbox" and .value.tray) as $own_flag
-    | "\(if .value.tray and ($own_flag | not) then "hidden" else "normal" end)\t\(.value.command + (if $own_flag then ["--minimize"] else [] end) | @sh)"' "$config" |
+    | "\(if .value.tray and ($own_flag | not) then "hidden" else "normal" end)\t\((.value.command | map(sub("^~/"; "\(env.HOME)/"))) + (if $own_flag then ["--minimize"] else [] end) | @sh)"' "$config" |
     while IFS="$tab" read -r mode command; do
         rules=""
-        [ "$mode" = "hidden" ] && rules=", { workspace = '$DESK_MINIMIZED_WORKSPACE silent' }"
+        [ "$mode" = "hidden" ] && rules=", { workspace = '${DESK_MINIMIZED_WORKSPACE:-special:minimized} silent' }"
         hyprctl eval "hl.dispatch(hl.dsp.exec_cmd([==[$command]==]$rules))" >/dev/null
     done

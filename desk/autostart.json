@@ -8,7 +8,7 @@
         "tray": false
     },
     "arch-assistant": {
-        "command": ["/home/redo/projects/arch-assistant/bin/arch-assistant"],
+        "command": ["~/projects/arch-assistant/bin/arch-assistant"],
         "tray": true
     }
 }

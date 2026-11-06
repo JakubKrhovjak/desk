@@ -95,6 +95,7 @@ require("placement")
 require("keybinds")
 require("window-behavior")
 require("window-memory").start()
+require("panel-fit")
 require("keyboard")
 
 -- Autostart

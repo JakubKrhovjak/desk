@@ -69,6 +69,28 @@ function minimize_active()
     minimize_timers[address] = hl.timer(function() finish_minimize(address) end, { timeout = minimize_fallback_ms, type = "oneshot" })
 end
 
+-- Třídy oken aplikací s ikonou v trayi; o trayi ví jen shell, posílá je z panel/PanelApps.qml.
+local tray_classes = {}
+
+function set_tray_classes(classes)
+    tray_classes = {}
+    for _, class in ipairs(classes) do
+        tray_classes[class] = true
+    end
+end
+
+-- Křížek v liště okna: aplikace s ikonou v trayi běží dál a okno se jen schová. Super + Q zavírá vždycky.
+function close_active()
+    local win = hl.get_active_window()
+    if not win then return end
+
+    if tray_classes[win.class] then
+        minimize_active()
+    else
+        hl.dispatch(hl.dsp.window.close())
+    end
+end
+
 -- Obnovení z panelu: shell přehraje animaci a na jejím konci zavolá finish_restore; pojistka vrátí okno i bez animace
 local restore_fallback_ms = 900
 local pending_restore = {}

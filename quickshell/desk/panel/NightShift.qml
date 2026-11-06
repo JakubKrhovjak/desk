@@ -36,7 +36,7 @@ ColumnLayout {
                 anchors.fill: nameText
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: WindowFactory.create(null, { startPage: PageRegistry.pages.findIndex(page => page.id === "nightshift") })
+                onClicked: WindowFactory.openPage("nightshift")
             }
         }
 

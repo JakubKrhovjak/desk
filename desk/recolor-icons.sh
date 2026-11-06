@@ -31,10 +31,8 @@ for entry in "$HOME"/.local/share/applications/jetbrains-*-*.desktop; do
     [[ -n $existing ]] && alias_icon "$icon" "${existing%.svg}"
 done
 
-alias_icon foot utilities-terminal
 alias_icon btop utilities-system-monitor
 alias_icon chromium brave-desktop
-alias_icon org.xfce.thunar system-file-manager
 alias_icon com.saivert.pwvucontrol multimedia-volume-control
 
 gtk-update-icon-cache -f -q -t "$theme" 2>/dev/null

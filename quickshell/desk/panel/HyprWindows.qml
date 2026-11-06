@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services
 
 // Ovládání oken z panelu: jediné místo, které skládá příkazy pro Hyprland. Funkce na druhé straně jsou v desk/*.lua.
 Singleton {
@@ -29,6 +30,28 @@ Singleton {
 
     function restoreMinimized(value: string, workspace: int): void {
         run([`restore_minimized("${address(value)}", ${workspace})`]);
+    }
+
+    function show(toplevel: var): void {
+        if (ShellEnv.isMinimized(toplevel))
+            restoreMinimized(toplevel.address, toplevel.monitor?.activeWorkspace?.id ?? Hypr.focusedWorkspace?.id ?? 1);
+        else
+            raise(toplevel.address);
+    }
+
+    // Názvy tříd určují aplikace a jdou do Lua jako kód, proto jen znaky, které se v nich běžně vyskytují
+    function setTrayClasses(classes: var): void {
+        const names = classes.filter(name => /^[\w.-]+$/.test(name)).map(name => `"${name}"`);
+        run([`set_tray_classes({ ${names.join(", ")} })`]);
+    }
+
+    function fitWindowsToPanel(oldHeight: int): void {
+        run([`fit_windows_to_panel(${oldHeight})`]);
+    }
+
+    // Stejně jako křížek v liště okna: aplikaci s ikonou v trayi jen schová
+    function closeFromBar(value: string): void {
+        run([focus(value), "close_active()"]);
     }
 
     function close(value: string): void {

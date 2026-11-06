@@ -24,8 +24,8 @@ StyledRect {
     }
 
     anchors.verticalCenter: parent?.verticalCenter
-    implicitWidth: big ? 38 : 34
-    implicitHeight: big ? 38 : 34
+    implicitWidth: big ? DeskPanelSettings.buttonSize : DeskPanelSettings.smallButtonSize
+    implicitHeight: implicitWidth
     radius: Tokens.rounding.full
     color: active ? Colours.palette.m3secondaryContainer : "transparent"
 
@@ -47,8 +47,8 @@ StyledRect {
         anchors.centerIn: parent
         visible: root.image !== ""
         source: root.image
-        sourceSize.width: root.big ? 28 : 24
-        sourceSize.height: root.big ? 28 : 24
+        sourceSize.width: root.big ? DeskPanelSettings.iconSize : DeskPanelSettings.smallIconSize
+        sourceSize.height: root.big ? DeskPanelSettings.iconSize : DeskPanelSettings.smallIconSize
         layer.enabled: visible
         layer.effect: MultiEffect {
             colorization: 1
@@ -61,6 +61,9 @@ StyledRect {
         visible: root.label === "" && root.image === ""
         text: root.icon
         color: root.contentColour
-        fontStyle: root.big ? Tokens.font.icon.large : Tokens.font.icon.medium
+        fontStyle: {
+            const base = root.big ? Tokens.font.icon.large : Tokens.font.icon.medium;
+            return Tokens.font.icon.size(base.pointSize * DeskPanelSettings.iconScale).weight(base.weight).vaxes(base.variableAxes).build();
+        }
     }
 }

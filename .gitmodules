@@ -1,3 +1,4 @@
 [submodule "quickshell/caelestia"]
 	path = quickshell/caelestia
 	url = git@github.com:JakubKrhovjak/caelestia-shell.git
+	update = merge

@@ -1,5 +1,6 @@
 import QtQuick
 import qs.components
+import qs.services
 
 // Vodorovný řádek položek SortItem, které jde přeuspořádat tažením myší.
 // Pořadí se ukládá do souboru, takže ho sdílí panely na všech monitorech a přežije restart.
@@ -49,7 +50,7 @@ Item {
     }
 
     implicitWidth: shownItems.reduce((sum, item) => sum + item.implicitWidth, 0) + Math.max(0, shownItems.length - 1) * spacing
-    implicitHeight: 38
+    implicitHeight: DeskPanelSettings.buttonSize
 
     onDragLeftChanged: {
         if (dragging)
@@ -79,7 +80,7 @@ Item {
         id: orderStore
 
         path: root.orderFile
-        onValueLoaded: value => {
+        onValueLoaded: {
             if (!root.dragging && Array.isArray(value))
                 root.order = value;
         }

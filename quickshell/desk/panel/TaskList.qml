@@ -7,6 +7,7 @@ import Quickshell.Widgets
 import Caelestia.Config
 import qs.components
 import qs.services
+import qs.modules.nexus
 
 // Správce úloh jako v Plasmě: jedna malá ikona na aplikaci, připnuté aplikace zůstávají i bez okna.
 // Klik: spustí neběžící aplikaci, zvedne okno, u více oken mezi nimi přepíná. Minimalizace je jen tlačítko v liště okna.
@@ -22,40 +23,20 @@ Item {
 
     property var pins: []
 
-    // Panel je jen jeden, takže ukazuje okna ze všech monitorů: normální plochy a minimalizovaná okna
-    readonly property var windows: Hypr.toplevels.values.filter(t => (t?.workspace?.id ?? -1) > 0 || isMinimized(t))
-    readonly property var windowKeys: windows.map(t => appKey(t)).filter(key => key !== "")
+    // Panel je jen jeden, takže ukazuje okna ze všech monitorů: normální plochy a minimalizovaná okna.
+    // Aplikace s ikonou v trayi žije jen tam, pokud si ji uživatel výslovně nepřipnul. Nastavení má vlastní tlačítko v panelu.
+    readonly property var windows: PanelApps.ordinaryWindows.filter(t => !WindowFactory.isSettingsWindow(t) && (!PanelApps.trayKeys.includes(PanelApps.appKey(t)) || pins.includes(PanelApps.appKey(t))))
+    readonly property var windowKeys: windows.map(t => PanelApps.appKey(t)).filter(key => key !== "")
     readonly property var appKeys: [...new Set([...pins, ...windowKeys])]
 
-    function isMinimized(toplevel: var): bool {
-        return toplevel?.workspace?.name === ShellEnv.minimizedWorkspace;
-    }
-
-    function entryFor(key: string): var {
-        return DesktopEntries.applications.values && DesktopEntries.heuristicLookup(key);
-    }
-
-    // Klíč aplikace je ID záznamu .desktop, jinak třída okna
-    function appKey(toplevel: var): string {
-        const windowClass = toplevel?.wayland?.appId || toplevel?.lastIpcObject?.class || "";
-        return entryFor(windowClass)?.id ?? windowClass;
-    }
-
     function windowsOf(key: string): var {
-        return windows.filter(t => appKey(t) === key);
-    }
-
-    function show(toplevel: var): void {
-        if (isMinimized(toplevel))
-            HyprWindows.restoreMinimized(toplevel.address, toplevel.monitor?.activeWorkspace?.id ?? monitor?.activeWorkspace?.id ?? 1);
-        else
-            HyprWindows.raise(toplevel.address);
+        return windows.filter(t => PanelApps.appKey(t) === key);
     }
 
     // Nové okno se otevře na monitoru, kde se kliklo
     function launch(key: string): void {
         HyprWindows.focusMonitor(screen.name);
-        entryFor(key)?.execute();
+        PanelApps.entryFor(key)?.execute();
     }
 
     function activate(key: string): void {
@@ -63,7 +44,7 @@ Item {
         if (group.length === 0)
             launch(key);
         else
-            show(group[(group.indexOf(Hyprland.activeToplevel) + 1) % group.length]);
+            HyprWindows.show(group[(group.indexOf(Hyprland.activeToplevel) + 1) % group.length]);
     }
 
     function closeOne(key: string): void {
@@ -82,8 +63,8 @@ Item {
     function menuItemsFor(key: string): var {
         const group = windowsOf(key);
         const pinned = pins.includes(key);
-        const hasEntry = !!entryFor(key);
-        const windowRows = group.length > 1 ? group.map(t => ({ label: t.title, action: () => show(t) })) : [];
+        const hasEntry = !!PanelApps.entryFor(key);
+        const windowRows = group.length > 1 ? group.map(t => ({ label: t.title, action: () => HyprWindows.show(t) })) : [];
         const launchRows = hasEntry ? [{ label: group.length > 0 ? "New window" : "Launch", action: () => launch(key) }] : [];
         const pinRows = hasEntry || pinned ? [{ label: pinned ? "Unpin from panel" : "Pin to panel", action: () => setPinned(key, !pinned) }] : [];
         const closeRows = group.length > 0 ? [{ label: group.length > 1 ? "Close all windows" : "Close window", action: () => group.map(t => HyprWindows.close(t.address)) }] : [];
@@ -95,17 +76,14 @@ Item {
     }
 
     function openMenu(key: string, item: Item): void {
-        menu.items = menuItemsFor(key);
-        menu.anchor.rect.x = item.mapToItem(window.contentItem, 0, 0).x;
-        menu.anchor.rect.y = window.height;
-        menu.visible = true;
+        menu.openAt(item.mapToItem(window.contentItem, 0, 0).x, menuItemsFor(key));
     }
 
     JsonFile {
         id: pinStore
 
         path: `${ShellEnv.stateDir}/panel-pins.json`
-        onValueLoaded: value => {
+        onValueLoaded: {
             if (Array.isArray(value))
                 root.pins = value;
         }
@@ -113,9 +91,8 @@ Item {
 
     // Střed ikony aplikace v okně panelu, kam odletí minimalizované okno
     function iconCenter(toplevel: var): var {
-        const key = appKey(toplevel);
-        const item = Array.from({ length: slots.count }, (_, index) => slots.itemAt(index)).find(slotItem => slotItem?.key === key);
-        return item ? item.mapToItem(window.contentItem, item.width / 2, item.height / 2) : null;
+        const key = PanelApps.appKey(toplevel);
+        return PanelApps.centerOf(slots, slotItem => slotItem.key === key, window);
     }
 
     SortableRow {
@@ -143,11 +120,11 @@ Item {
 
                     readonly property var group: root.windowsOf(slot.modelData)
                     readonly property bool isActive: group.includes(Hyprland.activeToplevel)
-                    readonly property bool allMinimized: group.length > 0 && group.every(t => root.isMinimized(t))
-                    readonly property string iconName: root.entryFor(slot.modelData)?.icon ?? ""
+                    readonly property bool allMinimized: group.length > 0 && group.every(t => ShellEnv.isMinimized(t))
+                    readonly property string iconName: PanelApps.entryFor(slot.modelData)?.icon ?? ""
 
-                    implicitWidth: 40
-                    implicitHeight: 40
+                    implicitWidth: DeskPanelSettings.taskSize
+                    implicitHeight: DeskPanelSettings.taskSize
                     radius: Tokens.rounding.full
                     color: isActive ? Colours.palette.m3secondaryContainer : "transparent"
 
@@ -167,7 +144,7 @@ Item {
 
                     IconImage {
                         anchors.centerIn: parent
-                        implicitSize: 28
+                        implicitSize: DeskPanelSettings.iconSize
                         opacity: task.allMinimized ? 0.55 : 1
                         source: Quickshell.iconPath(task.iconName, "application-x-executable")
                     }
@@ -195,48 +172,9 @@ Item {
         }
     }
 
-    PopupWindow {
+    PanelMenu {
         id: menu
 
-        property var items: []
-
-        anchor.window: root.window
-        color: "transparent"
-        implicitWidth: 260
-        implicitHeight: menuColumn.implicitHeight + 12
-
-        HyprlandFocusGrab {
-            active: menu.visible
-            windows: [menu]
-            onCleared: menu.visible = false
-        }
-
-        StyledRect {
-            anchors.fill: parent
-            radius: Tokens.rounding.medium
-            color: Colours.palette.m3surfaceContainer
-
-            Column {
-                id: menuColumn
-
-                anchors.fill: parent
-                anchors.margins: 6
-
-                Repeater {
-                    model: menu.items
-
-                    MenuRow {
-                        required property var modelData
-
-                        width: menuColumn.width
-                        label: modelData.label
-                        onActivated: {
-                            menu.visible = false;
-                            modelData.action();
-                        }
-                    }
-                }
-            }
-        }
+        window: root.window
     }
 }

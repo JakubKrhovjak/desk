@@ -31,12 +31,33 @@ StyledWindow {
     anchors.left: true
     anchors.right: true
     anchors.top: true
-    implicitHeight: 46
+    implicitHeight: DeskPanelSettings.panelHeight
 
     // Stejná plocha jako bubliny pod panelem, takže na něj plynule navazují
     Rectangle {
         anchors.fill: parent
         color: Colours.tPalette.m3surface
+    }
+
+    // Pravý klik na panel; položky, které pravý klik používají samy (okna, tray), ho sem nepustí
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.RightButton
+        onClicked: event => panelMenu.openAt(event.x, [{ label: "Panel settings", action: () => WindowFactory.openPage("deskpanel") }])
+    }
+
+    PanelMenu {
+        id: panelMenu
+
+        window: root
+    }
+
+    Connections {
+        target: DeskPanelSettings
+
+        function onPanelResized(oldHeight: int): void {
+            HyprWindows.fitWindowsToPanel(oldHeight);
+        }
     }
 
     // Spoušť dashboardu: horní okraj obrazovky uprostřed; otevřený dashboard drží celá výška panelu nad ním
@@ -48,8 +69,10 @@ StyledWindow {
     // Název vyskakovacího panelu pod myší a střed jeho ikony
     readonly property string statusHover: statusRow.dragging ? "" : keyboardButton.hovered ? "kblayout" : networkButton.hovered ? "network" : bluetoothButton.hovered ? "bluetooth" : volumeButton.hovered ? "audio" : ""
 
+    // Aplikace s ikonou v trayi v seznamu oken není, její okno letí do traye; Nastavení do svého tlačítka
     function taskIconCenter(toplevel: var): var {
-        return taskList.iconCenter(toplevel);
+        const settingsCenter = WindowFactory.isSettingsWindow(toplevel) ? settingsButton.mapToItem(contentItem, settingsButton.width / 2, settingsButton.height / 2) : null;
+        return settingsCenter ?? taskList.iconCenter(toplevel) ?? trayArea.iconCenter(toplevel);
     }
 
     function statusCenter(): real {
@@ -96,8 +119,11 @@ StyledWindow {
             }
 
             PanelButton {
+                id: settingsButton
+
                 big: true
                 icon: "settings"
+                active: WindowFactory.current !== null
                 onClicked: WindowFactory.create()
             }
         }
@@ -125,6 +151,8 @@ StyledWindow {
                     key: "tray"
 
                     TrayArea {
+                        id: trayArea
+
                         window: root
                     }
                 }
@@ -207,8 +235,10 @@ StyledWindow {
                             color: Colours.palette.m3tertiary
                         }
 
+                        // V nízkém panelu se dva řádky nevejdou
                         StyledText {
                             anchors.horizontalCenter: parent.horizontalCenter
+                            visible: DeskPanelSettings.panelHeight >= DeskPanelSettings.twoLineClockHeight
                             text: Qt.locale("en_US").toString(new Date(Time.format("yyyy-MM-ddTHH:mm:ss")), "MMM d, yyyy")
                             font: Tokens.font.body.small
                             color: Colours.palette.m3tertiary

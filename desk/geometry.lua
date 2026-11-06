@@ -17,16 +17,17 @@ local function snap_rect(side, x, y, w, h)
     })[side]
 end
 
--- Pracovní plocha monitoru bez panelu a s mezerou kolem
-local function monitor_snap_rect(mon, side)
+-- Pracovní plocha monitoru bez panelu a s mezerou kolem. Parametr top počítá s jinou výškou panelu, než je teď.
+local function monitor_snap_rect(mon, side, top)
     local res = mon.reserved
+    top = top or res.top
 
     local rect = snap_rect(
         side,
         mon.x + res.left + outer_gap,
-        mon.y + res.top + outer_gap,
+        mon.y + top + outer_gap,
         math.floor(mon.width / mon.scale - res.left - res.right - 2 * outer_gap),
-        math.floor(mon.height / mon.scale - res.top - res.bottom - 2 * outer_gap)
+        math.floor(mon.height / mon.scale - top - res.bottom - 2 * outer_gap)
     )
 
     -- Titulková lišta je nad oknem a počítá se do zabrané plochy
@@ -56,14 +57,15 @@ local function apply_rect(win, x, y, w, h)
 end
 
 -- Celá pracovní plocha monitoru přesně po panel, bez mezery
-local function maximized_rect(mon)
+local function maximized_rect(mon, top)
     local res = mon.reserved
+    top = top or res.top
 
     return {
         x = mon.x + res.left,
-        y = mon.y + res.top + bar_height,
+        y = mon.y + top + bar_height,
         w = math.floor(mon.width / mon.scale - res.left - res.right),
-        h = math.floor(mon.height / mon.scale - res.top - res.bottom) - bar_height,
+        h = math.floor(mon.height / mon.scale - top - res.bottom) - bar_height,
     }
 end
 

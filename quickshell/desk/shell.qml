@@ -34,7 +34,7 @@ ShellRoot {
         target: "nightshift"
 
         function open(): void {
-            WindowFactory.create(null, { startPage: PageRegistry.pages.findIndex(page => page.id === "nightshift") });
+            WindowFactory.openPage("nightshift");
         }
     }
 

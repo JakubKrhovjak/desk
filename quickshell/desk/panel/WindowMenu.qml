@@ -26,7 +26,7 @@ Scope {
         { label: pinned ? "Unpin from top" : "Pin on top", icon: "push_pin", filled: pinned, action: () => HyprWindows.togglePin(address) },
         { label: "Minimize", icon: "minimize", action: () => HyprWindows.minimize(address) },
         { label: "Maximize", icon: "crop_square", action: () => HyprWindows.toggleMaximize(address) },
-        { label: "Close", icon: "close", action: () => HyprWindows.close(address) }
+        { label: "Close", icon: "close", action: () => HyprWindows.closeFromBar(address) }
     ]
 
     IpcHandler {

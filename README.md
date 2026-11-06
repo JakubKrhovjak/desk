@@ -39,10 +39,16 @@ The script installs missing packages, prepares the submodule branches, builds th
 
 - Monitor names: `monitors` in `desk/config.lua`.
 - Keyboards: `desk/system/keyd/` is written for specific devices.
-- Startup apps: `desk/autostart.json` holds absolute paths and can be edited in Nexus (Apps → app → Startup).
+- Startup apps: `desk/autostart.json` can be edited in Nexus (Apps → app → Startup). A leading `~/` in a command is expanded.
 - Icons: the Simpleton theme in `~/.local/share/icons` is not part of this repository.
 - Colours: until Caelestia generates its scheme, Hyprland uses fallback colours from `desk/colours.lua`.
 - Not restored from this repository: `~/.config/caelestia/shell.json`, `~/.config/caelestia/hypr-user.lua` and the `macOS Cmd` keymap for IntelliJ IDEA.
+
+## Panel
+
+Panel height and icon size are set in Nexus (Top panel), or by right-clicking the panel. They are stored in `desk/panel-settings.json`.
+
+An app with a tray icon lives only in the tray, unless you pin it to the panel. Clicking its icon shows or hides the window, and the close button in the title bar only hides it. `Super + Q` always closes the window.
 
 ## Updating
 

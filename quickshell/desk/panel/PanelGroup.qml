@@ -12,7 +12,7 @@ StyledRect {
 
     Layout.alignment: Qt.AlignVCenter
     implicitWidth: row.implicitWidth + 8
-    implicitHeight: 40
+    implicitHeight: DeskPanelSettings.groupHeight
     radius: Tokens.rounding.full
     color: Colours.tPalette.m3surfaceContainer
 

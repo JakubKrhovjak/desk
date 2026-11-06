@@ -4,6 +4,7 @@ local xdg_state = os.getenv("XDG_STATE_HOME")
 
 local config = {
     dir = home .. "/.config/desk",
+    -- Výchozí kopie pro běh mimo session jsou v nightshift.sh a ShellEnv.qml
     state_dir = (xdg_state ~= "" and xdg_state or home .. "/.local/state") .. "/desk",
 
     monitors = {
@@ -23,6 +24,7 @@ local config = {
         shell = "org.quickshell",
     },
 
+    -- Výchozí kopie pro běh mimo session jsou v autostart.sh a ShellEnv.qml
     minimized_workspace = "special:minimized",
 }
 

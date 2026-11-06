@@ -62,6 +62,9 @@ check_keyd() {
 # Vrací 1, když se stav neuložil, a 2, když je uložený jen lokálně
 snapshot() { # $1 = důvod
     check_keyd
+    # Mimo větev by commit Caelestie osiřel a push HEAD by selhal, například po git submodule update
+    # Na větev upstream smí zapisovat jen merge_caelestia
+    [ "$("${caelestia_git[@]}" symbolic-ref -q --short HEAD)" = master ] || { warn "Caelestia není na větvi master: git -C $caelestia_dir checkout master"; return 1; }
     "${caelestia_git[@]}" add -A && commit_repo "caelestia" "$1" "${caelestia_git[@]}" || return 1
     "${desk_git[@]}" add -A -- "${desk_paths[@]}" && commit_repo "desk" "$1" "${desk_git[@]}" || return 1
 

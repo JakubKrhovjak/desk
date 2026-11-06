@@ -52,7 +52,7 @@ local function add_button(icon, action)
 end
 
 -- Pořadí zleva: zavřít, minimalizovat, maximalizovat
-add_button("✕", "hyprctl eval 'hl.dispatch(hl.dsp.window.close())'")
+add_button("✕", "hyprctl eval 'close_active()'")
 add_button("–", "hyprctl eval 'minimize_active()'")
 add_button("▢", "hyprctl eval 'toggle_maximize()'")
 

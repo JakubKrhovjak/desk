@@ -4,16 +4,21 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
-import Caelestia.Config
 import qs.components
 import qs.services
 import qs.utils
 
-// Systémová lišta vodorovně: levý klik aktivuje, pravý otevře nabídku aplikace
+// Systémová lišta vodorovně: levý klik ukáže nebo schová okno aplikace, pravý otevře její nabídku
 Row {
     id: root
 
     required property var window
+
+    // Střed ikony aplikace, kam odletí její schované okno
+    function iconCenter(toplevel: var): var {
+        const key = PanelApps.appKey(toplevel);
+        return PanelApps.centerOf(icons, candidate => PanelApps.trayKey(candidate.modelData) === key, window);
+    }
 
     spacing: 4
 
@@ -22,8 +27,10 @@ Row {
     }
 
     Repeater {
+        id: icons
+
         model: ScriptModel {
-            values: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
+            values: PanelApps.trayItems
         }
 
         MouseArea {
@@ -31,15 +38,15 @@ Row {
 
             required property SystemTrayItem modelData
 
-            implicitWidth: 30
-            implicitHeight: 38
+            implicitWidth: DeskPanelSettings.iconSize + 2
+            implicitHeight: DeskPanelSettings.buttonSize
             anchors.verticalCenter: parent?.verticalCenter
             acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
             cursorShape: Qt.PointingHandCursor
 
             onClicked: event => {
                 if (event.button === Qt.LeftButton && !modelData.onlyMenu) {
-                    modelData.activate();
+                    PanelApps.activateTray(modelData);
                 } else if (event.button === Qt.MiddleButton) {
                     modelData.secondaryActivate();
                 } else if (modelData.hasMenu) {
@@ -50,7 +57,7 @@ Row {
 
             IconImage {
                 anchors.centerIn: parent
-                implicitSize: 22
+                implicitSize: DeskPanelSettings.trayIconSize
                 source: Icons.getTrayIcon(item.modelData.id, item.modelData.icon)
             }
 

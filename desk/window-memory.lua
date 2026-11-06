@@ -137,6 +137,27 @@ local function check_windows()
     if changed then save_entries() end
 end
 
+-- Přepočítá uložené polohy na monitoru; fit dostává a vrací { x, y, w, h } relativně k monitoru
+function memory.refit(monitor, fit)
+    local changed = false
+    for key, e in pairs(entries) do
+        if e.monitor == monitor then
+            local rect = fit(e)
+            changed = remember(key, {
+                class = e.class,
+                title = e.title,
+                monitor = e.monitor,
+                -- Monitor hlásí polohu jako desetinné číslo, formát souboru bere jen celá
+                x = math.floor(rect.x),
+                y = math.floor(rect.y),
+                w = math.floor(rect.w),
+                h = math.floor(rect.h),
+            }) or changed
+        end
+    end
+    if changed then save_entries() end
+end
+
 function memory.has(win)
     return entries[key_of(win)] ~= nil
 end

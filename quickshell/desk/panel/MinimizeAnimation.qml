@@ -112,7 +112,7 @@ Scope {
 
                 readonly property real startX: (surface.request?.x ?? 0) - surface.modelData.x
                 readonly property real startY: (surface.request?.y ?? 0) - surface.modelData.y
-                readonly property real endSize: 28
+                readonly property real endSize: DeskPanelSettings.iconSize
                 readonly property real scaleX: 1 + (endSize / Math.max(width, 1) - 1) * surface.progress
                 readonly property real scaleY: 1 + (endSize / Math.max(height, 1) - 1) * surface.progress
                 // Svislý pohyb se opožďuje za vodorovným, takže okno letí po oblouku
