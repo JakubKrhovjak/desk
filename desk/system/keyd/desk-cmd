@@ -1,0 +1,9 @@
+# Vrstva klávesy Command pro prostředí desk: drží jako Ctrl, výjimky ovládají okna přes Super.
+# Na fyzickou klávesu ji napojí až ~/.config/desk/keyd-mode.sh, v Plasmě a Caelestii se nepoužívá.
+[cmd:C]
+left = M-left
+right = M-right
+up = M-up
+down = M-down
+f = M-f
+q = M-q

@@ -1,0 +1,14 @@
+{
+    "jetbrains-toolbox": {
+        "command": ["/opt/jetbrains-toolbox/jetbrains-toolbox"],
+        "tray": true
+    },
+    "ferdium": {
+        "command": ["/usr/bin/ferdium"],
+        "tray": false
+    },
+    "arch-assistant": {
+        "command": ["/home/redo/projects/arch-assistant/bin/arch-assistant"],
+        "tray": true
+    }
+}

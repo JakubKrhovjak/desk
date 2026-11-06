@@ -1,0 +1,96 @@
+#!/bin/bash
+# Aktualizace systému s ohledem na prostředí desk:
+#   1. uloží aktuální stav desk a kopie Caelestie do gitu,
+#   2. spustí yay -Syu,
+#   3. po změně Hyprlandu znovu zkompiluje plugin hyprbars,
+#   4. po změně Caelestie sloučí novou verzi do kopie; při konfliktu kopii nechá beze změny.
+# Použití: desk-update            celá aktualizace
+#          desk-update --snapshot jen uložení do gitu
+set -uo pipefail
+
+desk_git=(git --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
+caelestia_dir="$HOME/.config/quickshell/caelestia"
+caelestia_git=(git -C "$caelestia_dir")
+caelestia_system=/etc/xdg/quickshell/caelestia
+plugins_src="$HOME/.local/src/hyprland-plugins"
+plugin_target="$HOME/.config/desk/plugins/hyprbars.so"
+
+say() { printf '\n==> %s\n' "$*"; }
+warn() { printf '\n!!! %s\n' "$*" >&2; }
+version_of() { pacman -Q "$1" 2>/dev/null | cut -d' ' -f2; }
+
+save_repo() { # $1 = popis, zbytek = příkaz gitu
+    local label=$1
+    shift
+    "$@" add -A || return 1
+    if ! "$@" diff --cached --quiet; then
+        "$@" commit -q -m "Snapshot $(date '+%Y-%m-%d %H:%M')" && say "$label: uložen nový stav"
+    fi
+    if "$@" remote get-url origin >/dev/null 2>&1; then
+        "$@" push -q origin HEAD || warn "$label: push selhal, stav je uložený jen lokálně"
+    fi
+}
+
+snapshot() {
+    mkdir -p "$HOME/.config/desk/system/keyd"
+    cp /etc/keyd/*.conf /etc/keyd/desk-cmd "$HOME/.config/desk/system/keyd/" 2>/dev/null
+    save_repo "desk" "${desk_git[@]}"
+    save_repo "caelestia" "${caelestia_git[@]}"
+}
+
+rebuild_hyprbars() {
+    say "Hyprland se změnil, kompiluji hyprbars"
+    git -C "$plugins_src" fetch -q origin || { warn "nepodařilo se stáhnout zdroj pluginu"; return 1; }
+
+    # hyprpm.toml páruje commit Hyprlandu s commitem pluginu; bez záznamu platí nejnovější verze
+    local hyprland_commit pin
+    hyprland_commit=$(Hyprland --version | grep -oE 'commit [0-9a-f]{40}' | head -n 1 | cut -d' ' -f2)
+    git -C "$plugins_src" checkout -q origin/main
+    pin=$(grep -F "\"$hyprland_commit\"" "$plugins_src/hyprpm.toml" | grep -oE '"[0-9a-f]{40}"' | tail -n 1 | tr -d '"')
+    [ -n "$pin" ] && git -C "$plugins_src" checkout -q "$pin"
+
+    if make -C "$plugins_src/hyprbars" all >/dev/null; then
+        install -m755 "$plugins_src/hyprbars/hyprbars.so" "$plugin_target"
+        say "hyprbars zkompilován, načte se po dalším přihlášení"
+    else
+        warn "kompilace hyprbars selhala: okna budou bez lišt, zbytek prostředí poběží"
+        return 1
+    fi
+}
+
+merge_caelestia() {
+    say "Caelestia se změnila, slučuji novou verzi do kopie"
+    local work
+    work=$(mktemp -d)
+    "${caelestia_git[@]}" worktree add -q "$work" upstream || { rm -rf "$work"; warn "nepovedlo se připravit větev upstream"; return 1; }
+
+    rsync -a --delete --exclude .git "$caelestia_system/" "$work/"
+    git -C "$work" add -A
+    git -C "$work" diff --cached --quiet || git -C "$work" commit -q -m "Caelestia shell $(version_of caelestia-shell)"
+    "${caelestia_git[@]}" worktree remove --force "$work"
+    rm -rf "$work"
+
+    if "${caelestia_git[@]}" merge -q --no-edit upstream; then
+        say "Caelestia sloučena, projeví se po restartu shellu"
+    else
+        "${caelestia_git[@]}" merge --abort
+        warn "sloučení Caelestie má konflikty, kopie zůstala beze změny. Nová verze je ve větvi upstream: git -C $caelestia_dir merge upstream"
+        return 1
+    fi
+}
+
+snapshot || warn "uložení do gitu selhalo"
+[ "${1:-}" = "--snapshot" ] && exit 0
+
+hyprland_before=$(version_of hyprland)
+caelestia_before=$(version_of caelestia-shell)
+
+say "Spouštím yay -Syu"
+yay -Syu || { warn "aktualizace neproběhla celá"; exit 1; }
+
+[ "$(version_of hyprland)" != "$hyprland_before" ] && rebuild_hyprbars
+[ "$(version_of caelestia-shell)" != "$caelestia_before" ] && merge_caelestia
+
+snapshot || warn "uložení do gitu selhalo"
+
+say "Hotovo. Nové verze aplikací a jádra se projeví po odhlášení nebo restartu počítače."

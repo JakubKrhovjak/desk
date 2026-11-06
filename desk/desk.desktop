@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Desk
+Comment=Vlastní prostředí nad Hyprlandem
+Exec=/home/redo/.config/desk/start.sh
+Type=Application
+DesktopNames=Hyprland
