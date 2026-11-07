@@ -1,11 +1,11 @@
 #!/bin/bash
 # Nastaví klávesu Command v keyd podle aktivní aplikace: keyd-mode.sh base|ghostty|idea|off
-# Command je levý Alt jako na Macu: držení = Ctrl (vrstva cmd v /etc/keyd/desk-cmd), ťuknutí = F24 (menu aplikací).
-# Klávesa s logem Windows je Super pro práci s okny, pravý Alt zůstává (na us běžný Alt, na cz AltGr).
+# Command je levý Alt jako na Macu: držení = Ctrl (vrstva cmd v /etc/keyd/desk-cmd).
+# Klávesa s logem Windows je Super pro práci s okny, ťuknutí = F24 (menu aplikací). Pravý Alt zůstává (na us běžný Alt, na cz AltGr).
 
 base=(
-    'main.hostalt=overload(cmd,f24)'
-    'main.hostwin=layer(meta)'
+    'main.hostalt=layer(cmd)'
+    'main.hostwin=overload(vt,f24)'
     'main.hostaltgr=layer(altgr)'
 )
 

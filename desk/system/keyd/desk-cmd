@@ -1,6 +1,7 @@
 # Super + F1 až F6 přepíná terminály (Hyprland běží na tty1). Levý Alt je Command, takže Ctrl + Alt + F3 neexistuje.
 # Spouští to přímo keyd, aby přepnutí fungovalo i při zamrzlém Hyprlandu. Platí ve všech režimech i v Plasmě.
-[meta]
+# Vlastní vrstva místo [meta]: fyzický Ctrl v IntelliJ drží meta (keyd-mode.sh) a Ctrl + F4 nesmí přepnout terminál.
+[vt:M]
 f1 = command(/usr/bin/chvt 1)
 f2 = command(/usr/bin/chvt 2)
 f3 = command(/usr/bin/chvt 3)

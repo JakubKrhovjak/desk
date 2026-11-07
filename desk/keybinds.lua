@@ -60,7 +60,7 @@ hl.bind("CTRL + code:201", hl.dsp.global("caelestia:windowSwitcherNext"), { repe
 hl.bind("CTRL + Control_L", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 hl.bind("CTRL + Control_R", hl.dsp.global("caelestia:windowSwitcherCommit"), { release = true, non_consuming = true })
 
--- Ťuknutí na Command otevře menu aplikací: keyd při ťuknutí posílá F24 (kód 202), viz keyd-mode.sh
+-- Ťuknutí na Super otevře menu aplikací: keyd při ťuknutí posílá F24 (kód 202), viz keyd-mode.sh
 hl.bind("code:202", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
 
 -- Systémové zkratky jako na Macu: Cmd + mezerník otevře nabídku, Cmd + M a Cmd + H schovají okno
