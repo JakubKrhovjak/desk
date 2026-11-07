@@ -74,8 +74,12 @@ hl.config({
         kb_layout = "us,cz",
         kb_variant = ",winkeys-qwerty", -- česká QWERTY s rozmístěním znaků jako na Windows
         kb_options = "", -- rozložení přepíná Command + ťuknutí na Shift, viz keybinds.lua
-        repeat_delay = 250,
-        repeat_rate = 35,
+        -- Ze stránky Keyboard & mouse v Nastavení (config.input)
+        repeat_delay = config.input.repeat_delay,
+        repeat_rate = config.input.repeat_rate,
+        sensitivity = config.input.sensitivity,
+        accel_profile = config.input.accel_profile,
+        natural_scroll = config.input.natural_scroll,
         numlock_by_default = true,
         follow_mouse = 2, -- fokus až po kliknutí, jako v Plasmě
     },

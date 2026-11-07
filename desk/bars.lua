@@ -26,19 +26,9 @@ local function bar_color(percent)
     return string.format("rgba(%s%02x)", scheme.secondaryContainer, math.floor(percent * 2.55 + 0.5))
 end
 
--- Krytí zapisuje shell do panel-settings.json i se spojením s panelem už vyřešeným.
--- Hodnota ze souboru se svírá, aby neplatná barva nezastavila načítání konfigurace; spodní mez je minPanelOpacity v DeskPanelSettings.qml.
-local default_opacity = 50
-
+-- Krytí zapisuje shell do panel-settings.json i se spojením s panelem už vyřešeným
 local function saved_opacity()
-    local file = io.open(config.dir .. "/panel-settings.json", "r")
-    if not file then
-        return default_opacity
-    end
-    local text = file:read("a")
-    file:close()
-    local opacity = tonumber(text:match('"windowBarOpacity"%s*:%s*(%d+)')) or default_opacity
-    return math.max(25, math.min(100, opacity))
+    return config.saved_opacity("windowBarOpacity", 50)
 end
 
 -- Volá shell přes hyprctl eval při změně v Nastavení
