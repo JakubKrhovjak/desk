@@ -60,12 +60,12 @@ Nexus (Wallpaper & style → Colours) offers Simpleton, four warm pastel seasons
 desk-update
 ```
 
-It commits and pushes the current state, runs `yay -Syu`, rebuilds `hyprbars` when it doesn't match the installed Hyprland and merges the installed Caelestia release into the patched copy. Both steps go by the current state, so they also catch up after a failed `yay` or an update run outside this script. A commit that looks like it contains a secret is refused.
+It runs `yay -Syu`, rebuilds `hyprbars` when it doesn't match the installed Hyprland and merges the installed Caelestia release into the patched copy. Both steps go by the current state, so they also catch up after a failed `yay` or an update run outside this script. It commits nothing in `~/.config`: the Caelestia merge happens in the working copy `~/projects/desk`, gets a commit there and is deployed with `desk-deploy`; pushing is up to you. Without a working copy (a fresh install) it merges in the deployed copy and does not push.
 
 The keyd config in `desk/system/keyd/` is the source of truth. `desk-update` only warns when `/etc/keyd` differs, and `desk/system/install-keyd.sh` applies the repository copy.
 
-Caelestia uses a vendor branch: `upstream` holds clean releases and `master` holds them with my changes. If a merge conflicts, it is aborted and the copy stays as it was, so you can resolve it by hand with `git -C ~/.config/quickshell/caelestia merge upstream`.
+Caelestia uses a vendor branch: `upstream` holds clean releases and `master` holds them with my changes. If a merge conflicts, it is aborted and the copy stays as it was, so you can resolve it by hand with `git -C ~/projects/desk/quickshell/caelestia merge upstream`.
 
-`desk-update --snapshot` only commits and pushes. `desk-update --hyprbars` only rebuilds the plugin.
+`desk-update --hyprbars` only rebuilds the plugin.
 
 Without the plugin, windows just lose their title bars and everything else keeps working.

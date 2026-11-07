@@ -1,59 +1,29 @@
 #!/bin/bash
-# Aktualizace systému s ohledem na prostředí desk:
-#   1. uloží aktuální stav desk a kopie Caelestie do gitu,
-#   2. spustí yay -Syu,
-#   3. když hyprbars neodpovídá nainstalovanému Hyprlandu, zkompiluje ho,
-#   4. sloučí nainstalovanou verzi Caelestie do kopie; při konfliktu kopii nechá beze změny.
-# Kroky 3 a 4 se řídí stavem, ne změnou v tomto běhu: doženou i selhaný yay nebo aktualizaci mimo tento skript.
+# Aktualizace systému s ohledem na prostředí desk (změny našeho kódu nasazuje desk-deploy, ne tenhle skript):
+#   1. spustí yay -Syu,
+#   2. když hyprbars neodpovídá nainstalovanému Hyprlandu, zkompiluje ho,
+#   3. sloučí nainstalovanou verzi Caelestie do naší kopie; při konfliktu kopii nechá beze změny.
+# Slučuje se v pracovní kopii (~/projects/desk), kde vznikne commit, a nasadí se přes desk-deploy; push je na uživateli.
+# Bez pracovní kopie (čistá instalace, test ve virtuálce) se slučuje přímo v nasazené kopii v ~/.config, bez pushe.
+# Kroky 2 a 3 se řídí stavem, ne změnou v tomto běhu: doženou i selhaný yay nebo aktualizaci mimo tento skript.
 # Použití: desk-update            celá aktualizace
-#          desk-update --snapshot jen uložení do gitu
 #          desk-update --hyprbars jen kompilace pluginu hyprbars
 #          desk-update --yes      celá aktualizace bez dotazů, pro test ve virtuálce
 set -uo pipefail
 
 desk_git=(git -C "$HOME/.config" --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
-# Výčet je tady, ne jen v info/exclude: ten se neklonuje a na novém stroji by add -A poslal do veřejného repa celý ~/.config
-desk_paths=(README.md desk quickshell/desk quickshell/caelestia .gitmodules ghostty/config)
-caelestia_dir="$HOME/.config/quickshell/caelestia"
-caelestia_git=(git -C "$caelestia_dir")
+dev_dir=${DESK_DEV_DIR:-$HOME/projects/desk}
 caelestia_system=/etc/xdg/quickshell/caelestia
 plugins_src="$HOME/.local/src/hyprland-plugins"
 desk_dir=$(dirname "$(realpath "$0")")
 plugin_target="$desk_dir/plugins/hyprbars.so"
 plugin_stamp="$plugin_target.built-for"
-# Délka za prefixem je povinná, jinak by vzor našel sám sebe v diffu tohoto skriptu
-secret_pattern='ghp_[A-Za-z0-9]{20}|gho_[A-Za-z0-9]{20}|github_pat_[A-Za-z0-9_]{20}|glpat-[A-Za-z0-9_-]{20}|sk-ant-[A-Za-z0-9_-]{20}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY'
 
 say() { printf '\n==> %s\n' "$*"; }
 warn() { printf '\n!!! %s\n' "$*" >&2; }
 version_of() { pacman -Q "$1" 2>/dev/null | cut -d' ' -f2; }
 
-commit_repo() { # $1 = popis, $2 = důvod, zbytek = příkaz gitu; změny už musí být v indexu
-    local label=$1 reason=$2
-    shift 2
-    "$@" diff --cached --quiet && return 0
-
-    "$@" diff --cached --stat
-    # Přes here-string: grep -q ukončí rouru dřív a pipefail by nález vydával za neúspěch hledání
-    if grep -qE "$secret_pattern" <<< "$("$@" diff --cached -U0 | grep -E '^\+')"; then
-        warn "$label: ve změnách je něco jako tajemství, nic se neuložilo ani nepushnulo. Změny jsou v indexu."
-        return 1
-    fi
-
-    # Čistá instalace identitu gitu nemá, záložní bod před aktualizací na ní nesmí záviset
-    local identity=()
-    "$@" var GIT_COMMITTER_IDENT >/dev/null 2>&1 || identity=(-c "user.name=$USER" -c "user.email=$USER@$(uname -n)")
-    "$@" "${identity[@]}" commit -q -m "Snapshot $(date '+%Y-%m-%d %H:%M') ($reason)" || { warn "$label: commit selhal"; return 1; }
-    say "$label: uložen nový stav"
-}
-
-push_repo() { # $1 = popis, $2 = větve k pushnutí, zbytek = příkaz gitu
-    local label=$1 refs=$2
-    shift 2
-    "$@" remote get-url origin >/dev/null 2>&1 || return 0
-    # shellcheck disable=SC2086 # refs je záměrně seznam oddělený mezerami
-    "$@" push -q origin $refs || { warn "$label: push selhal, stav je uložený jen lokálně"; return 1; }
-}
+has_dev_copy() { [[ -d $dev_dir/.git && -e $dev_dir/quickshell/caelestia/.git ]]; }
 
 # Zdrojem pravdy pro keyd je repo; změna jen v /etc/keyd by se při kopírování zpět mohla přepsat s opravou v repu
 check_keyd() {
@@ -63,21 +33,10 @@ check_keyd() {
     printf '%s\n' "$changes" >&2
 }
 
-# Vrací 1, když se stav neuložil, a 2, když je uložený jen lokálně
-snapshot() { # $1 = důvod
-    check_keyd
-    # Mimo větev by commit Caelestie osiřel a push HEAD by selhal, například po git submodule update
-    # Na větev upstream smí zapisovat jen merge_caelestia
-    [ "$("${caelestia_git[@]}" symbolic-ref -q --short HEAD)" = master ] || { warn "Caelestia není na větvi master: git -C $caelestia_dir checkout master"; return 1; }
-    "${caelestia_git[@]}" add -A && commit_repo "caelestia" "$1" "${caelestia_git[@]}" || return 1
-    "${desk_git[@]}" add -A -- "${desk_paths[@]}" && commit_repo "desk" "$1" "${desk_git[@]}" || return 1
-
-    # Caelestia první: desk v submodulu odkazuje na její commit, který už musí existovat i na GitHubu
-    if ! push_repo "caelestia" "HEAD upstream" "${caelestia_git[@]}"; then
-        warn "desk se nepushuje, jeho submodul by ukazoval na commit, který na GitHubu není"
-        return 2
-    fi
-    push_repo "desk" "HEAD" "${desk_git[@]}" || return 2
+# Nasazená kopie se ručně neupravuje; necommitnutá změna by se dalším desk-deploy zastavila
+check_deployed() {
+    "${desk_git[@]}" diff --quiet HEAD && git -C "$HOME/.config/quickshell/caelestia" diff --quiet HEAD && return 0
+    warn "nasazená kopie v ~/.config má necommitnuté změny; patří do pracovní kopie $dev_dir"
 }
 
 hyprbars_is_current() {
@@ -111,10 +70,16 @@ rebuild_hyprbars() {
     fi
 }
 
-# Bez nové verze nic nezmění; po konfliktu se ozve při každém dalším běhu
-merge_caelestia() {
+# Bez nové verze nic nezmění; po konfliktu se ozve při každém dalším běhu. Vypíše, zda se kopie změnila (changed).
+merge_caelestia() { # $1 = repozitář kopie Caelestie
+    local repo=$1 work before
+    local caelestia_git=(git -C "$repo")
     [ -d "$caelestia_system" ] || { warn "chybí $caelestia_system, balíček caelestia-shell není nainstalovaný"; return 1; }
-    local work before
+    [ "$("${caelestia_git[@]}" symbolic-ref -q --short HEAD)" = master ] || { warn "Caelestia v $repo není na větvi master"; return 1; }
+    "${caelestia_git[@]}" diff --quiet HEAD || { warn "Caelestia v $repo má necommitnuté změny, slučování přeskočeno"; return 1; }
+    "${caelestia_git[@]}" rev-parse -q --verify refs/heads/upstream >/dev/null \
+        || "${caelestia_git[@]}" branch -q upstream origin/upstream || { warn "Caelestia v $repo nemá větev upstream"; return 1; }
+
     work=$(mktemp -d)
     # Přerušený běh mohl nechat zaregistrovaný worktree, se kterým by další add selhal
     "${caelestia_git[@]}" worktree prune
@@ -128,29 +93,39 @@ merge_caelestia() {
 
     before=$("${caelestia_git[@]}" rev-parse HEAD)
     if "${caelestia_git[@]}" merge -q --no-edit upstream; then
-        [ "$("${caelestia_git[@]}" rev-parse HEAD)" = "$before" ] || say "Caelestia sloučena, projeví se po restartu shellu"
+        [ "$("${caelestia_git[@]}" rev-parse HEAD)" = "$before" ] || echo changed
     else
         "${caelestia_git[@]}" merge --abort
-        warn "sloučení Caelestie má konflikty, kopie zůstala beze změny. Nová verze je ve větvi upstream: git -C $caelestia_dir merge upstream"
+        warn "sloučení Caelestie má konflikty, kopie zůstala beze změny. Nová verze je ve větvi upstream: git -C $repo merge upstream"
         return 1
     fi
 }
 
-case "${1:-}" in
-    --hyprbars)
-        rebuild_hyprbars
-        exit
-        ;;
-    --snapshot)
-        snapshot "manual"
-        exit
-        ;;
-esac
+# V pracovní kopii: sloučit, zapsat nový odkaz na Caelestii do desku a nasadit
+update_caelestia() {
+    local merged
+    if ! has_dev_copy; then
+        merged=$(merge_caelestia "$HOME/.config/quickshell/caelestia") || return 1
+        [ "$merged" = changed ] && say "Caelestia sloučena v nasazené kopii, projeví se po restartu shellu"
+        return 0
+    fi
 
-# Bez bodu návratu se neaktualizuje; samotný nedostupný GitHub aktualizaci nezastaví
-snapshot "before update"
-[ $? -eq 1 ] && { warn "stav se neuložil, aktualizace se nespustí"; exit 1; }
+    merged=$(merge_caelestia "$dev_dir/quickshell/caelestia") || return 1
+    [ "$merged" = changed ] || return 0
+    git -C "$dev_dir" add quickshell/caelestia
+    git -C "$dev_dir" commit -q -m "caelestia: merge Caelestia shell $(version_of caelestia-shell)" || { warn "commit odkazu na Caelestii v $dev_dir selhal"; return 1; }
+    say "Caelestia sloučena v $dev_dir, nasazuji"
+    "$desk_dir/desk-deploy.sh" "$dev_dir" || return 1
+    say "Nezapomeň pushnout: git -C $dev_dir/quickshell/caelestia push origin master upstream && git -C $dev_dir push"
+}
 
+if [ "${1:-}" = --hyprbars ]; then
+    rebuild_hyprbars
+    exit
+fi
+
+check_keyd
+check_deployed
 result=0
 
 say "Spouštím yay -Syu"
@@ -159,9 +134,7 @@ yay_options=()
 yay -Syu "${yay_options[@]}" || { warn "aktualizace neproběhla celá, dokončuji zbývající kroky"; result=1; }
 
 hyprbars_is_current || rebuild_hyprbars || result=1
-merge_caelestia || result=1
-
-snapshot "after update" || { warn "uložení do gitu po aktualizaci selhalo"; result=1; }
+update_caelestia || result=1
 
 if [ "$result" -eq 0 ]; then
     say "Hotovo. Nové verze aplikací a jádra se projeví po odhlášení nebo restartu počítače."
