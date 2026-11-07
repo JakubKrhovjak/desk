@@ -43,7 +43,7 @@ end)
 
 -- Volá shell přes hyprctl eval při změně v Nastavení
 function window_opacity(percent)
-    shell_opacity = math.max(25, math.min(100, percent))
+    shell_opacity = config.clamp_opacity(percent)
     for _, win in ipairs(hl.get_windows()) do
         if win.class == config.classes.shell then
             apply_shell_opacity(win)

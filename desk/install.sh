@@ -115,7 +115,7 @@ setup_user() {
 # Správce přihlášení nerozvíjí proměnné v Exec, proto se položka generuje s plnou cestou
 setup_system() {
     say "Položka Desk ve správci přihlášení"
-    printf '%s\n' '[Desktop Entry]' 'Name=Desk' 'Comment=Vlastní prostředí nad Hyprlandem' "Exec=$desk_dir/start.sh" 'Type=Application' 'DesktopNames=Hyprland' | sudo tee /usr/share/wayland-sessions/desk.desktop >/dev/null
+    printf '%s\n' '[Desktop Entry]' 'Name=Desk' 'Comment=Custom desktop on Hyprland' "Exec=$desk_dir/start.sh" 'Type=Application' 'DesktopNames=Hyprland' | sudo tee /usr/share/wayland-sessions/desk.desktop >/dev/null
 
     say "keyd"
     sudo systemctl enable --now keyd

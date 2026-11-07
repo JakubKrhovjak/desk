@@ -23,7 +23,7 @@ Scope {
     }
 
     function finishRestore(address: string): void {
-        HyprWindows.run([`finish_restore("${address}")`]);
+        HyprWindows.finishRestore(address);
     }
 
     IpcHandler {
@@ -88,7 +88,7 @@ Scope {
                         height: saved.height
                     };
                     // Okno se schová a animace začne až s hotovým snímkem, jinak by ho konec animace zahodil
-                    HyprWindows.run([`finish_minimize("${saved.address}")`]);
+                    HyprWindows.finishMinimize(saved.address);
                     shrink.restart();
                 });
             }

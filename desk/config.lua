@@ -11,22 +11,28 @@ local function load_monitors()
 end
 
 -- Klávesnice a myš ze stránky Keyboard & mouse (services/DeskInput.qml zapisuje JSON, Lua JSON neumí, proto vzory).
--- Hodnoty se svírají stejně jako v DeskInput.qml, poškozený nebo chybějící soubor dá výchozí hodnoty.
+-- Meze a výchozí hodnoty odpovídají DeskInput.limits; poškozený nebo chybějící soubor dá výchozí hodnoty.
+local input_limits = {
+    sensitivity = { from = -1, to = 1, initial = 0 },
+    repeatDelay = { from = 150, to = 1000, initial = 250 },
+    repeatRate = { from = 10, to = 60, initial = 35 },
+}
+
 local function load_input(path)
-    local input = { sensitivity = 0, accel_profile = "adaptive", natural_scroll = false, repeat_delay = 250, repeat_rate = 35 }
     local file = io.open(path, "r")
-    if not file then
-        return input
+    local text = file and file:read("a") or ""
+    if file then
+        file:close()
     end
-    local text = file:read("a")
-    file:close()
-    local function number(key, low, high, default)
+    local function number(key)
+        local limit = input_limits[key]
         local value = tonumber(text:match('"' .. key .. '"%s*:%s*(%-?[%d.]+)'))
-        return value and math.max(low, math.min(high, value)) or default
+        return value and math.max(limit.from, math.min(limit.to, value)) or limit.initial
     end
-    input.sensitivity = number("sensitivity", -1, 1, 0)
-    input.repeat_delay = math.floor(number("repeatDelay", 150, 1000, 250))
-    input.repeat_rate = math.floor(number("repeatRate", 10, 60, 35))
+    local input = {}
+    input.sensitivity = number("sensitivity")
+    input.repeat_delay = math.floor(number("repeatDelay"))
+    input.repeat_rate = math.floor(number("repeatRate"))
     input.accel_profile = text:match('"acceleration"%s*:%s*false') and "flat" or "adaptive"
     input.natural_scroll = text:match('"naturalScroll"%s*:%s*true') ~= nil
     return input
@@ -65,8 +71,13 @@ function config.shell_ipc(args)
     return "qs -c desk ipc call " .. args
 end
 
--- Krytí v procentech ze stránky Panels (services/DeskPanelSettings.qml zapisuje desk/panel-settings.json).
--- Hodnota se svírá, aby neplatné číslo nezastavilo načítání konfigurace; spodní mez je minPanelOpacity.
+-- Krytí v procentech: meze odpovídají minPanelOpacity a maxPanelOpacity v services/DeskPanelSettings.qml.
+-- Svírá se, aby neplatné číslo nezastavilo načítání konfigurace.
+function config.clamp_opacity(percent)
+    return math.max(25, math.min(100, percent))
+end
+
+-- Krytí ze stránky Panels (services/DeskPanelSettings.qml zapisuje desk/panel-settings.json)
 function config.saved_opacity(key, default)
     local file = io.open(config.dir .. "/panel-settings.json", "r")
     if not file then
@@ -74,8 +85,7 @@ function config.saved_opacity(key, default)
     end
     local text = file:read("a")
     file:close()
-    local opacity = tonumber(text:match('"' .. key .. '"%s*:%s*(%d+)')) or default
-    return math.max(25, math.min(100, opacity))
+    return config.clamp_opacity(tonumber(text:match('"' .. key .. '"%s*:%s*(%d+)')) or default)
 end
 
 -- Regulární výraz přesně na daný text, do pravidel oken

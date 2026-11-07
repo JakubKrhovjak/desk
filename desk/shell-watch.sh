@@ -3,9 +3,14 @@
 # Spadl-li shell na zamčené obrazovce, Hyprland zůstane zamčený bez možnosti zadat heslo; nový shell proto zámek převezme
 # (misc.allow_session_lock_restore v hyprland.lua). Zastaví se po pěti rychlých koncích za sebou.
 quick_exits=0
+log="${DESK_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/desk}/shell-watch.log"
+mkdir -p "$(dirname "$log")"
 
-# Oznámení obstarává právě shell; když neběží, notify-send by čekal navždy, proto na pozadí s časovým limitem
-warn() { timeout 5 notify-send -u critical "Desk" "$1" & }
+# Oznámení běžně obstarává právě shell, proto hláška přes Hyprland (funguje i bez shellu) a do logu
+warn() {
+    printf '%s %s\n' "$(date '+%F %T')" "$1" >> "$log"
+    hyprctl notify 3 60000 0 "desk: $1" >/dev/null 2>&1
+}
 
 is_locked() { [[ $(hyprctl -j locked 2>/dev/null | jq -r .locked) == true ]]; }
 
@@ -25,11 +30,11 @@ while hyprctl version >/dev/null 2>&1; do
     started=$SECONDS
     qs -c desk -n &
     shell=$!
-    $was_locked && { relock || warn "Zámek se po pádu shellu nepodařilo obnovit"; }
+    $was_locked && { relock || warn "could not restore the lock after a shell crash. Super + F3, log in, run: hyprctl --instance 0 eval 'hl.clear_crashed_lockscreen()'"; }
     wait "$shell"
     (( SECONDS - started < 10 )) && (( quick_exits += 1 )) || quick_exits=0
     if (( quick_exits >= 5 )); then
-        warn "Shell opakovaně padá, automatické spouštění je vypnuté. Log: qs -c desk log, znovu: desk/restart-shell.sh"
+        warn "the shell keeps crashing, restarting it is off. Log: qs -c desk log. Start it again: ~/.config/desk/restart-shell.sh"
         exit 1
     fi
     sleep 1

@@ -170,11 +170,11 @@ ShellRoot {
     WindowMenu {}
     WindowSwitcher {
         focusedMonitorOnly: true
-        ignoredClasses: ["jetbrains-toolbox"]
+        ignoredClasses: [ShellEnv.toolboxClass]
         minimizedWorkspace: ShellEnv.minimizedWorkspace
     }
     Overview {
-        ignoredClasses: ["jetbrains-toolbox"]
+        ignoredClasses: [ShellEnv.toolboxClass]
     }
     IdleMonitors {
         lock: lock

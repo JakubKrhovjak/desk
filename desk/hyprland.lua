@@ -49,6 +49,7 @@ hl.env("DESK_DIR", config.dir)
 hl.env("DESK_STATE_DIR", config.state_dir)
 hl.env("DESK_MINIMIZED_WORKSPACE", config.minimized_workspace)
 hl.env("DESK_SHELL_CLASS", config.classes.shell)
+hl.env("DESK_TOOLBOX_CLASS", config.classes.toolbox)
 
 -- Vzhled a chování oken
 hl.config({

@@ -110,7 +110,7 @@ Scope {
                 StyledText {
                     anchors.centerIn: parent
                     visible: content.count === 0
-                    text: qsTr("No windows on this screen")
+                    text: "No windows on this screen"
                     color: Colours.palette.m3onSurface
                     font: Tokens.font.body.large
                 }
