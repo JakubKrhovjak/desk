@@ -92,5 +92,8 @@
     },
     "utilities": {
         "enabled": true
+    },
+    "notifs": {
+        "expire": true
     }
 }
