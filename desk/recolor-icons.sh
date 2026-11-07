@@ -1,9 +1,9 @@
 #!/bin/bash
-# Přebarví ikony motivu Simpleton podle barevného schématu Caelestie a doplní ikony, které v motivu chybí.
+# Přebarví ikony motivu Desk (ikony Simpletonu) podle barevného schématu Caelestie a doplní ikony, které v motivu chybí.
 # Spouští se při startu shellu a po změně schématu (shell.qml). Dá se pouštět opakovaně.
 set -uo pipefail
 
-theme="$HOME/.local/share/icons/Simpleton"
+theme="$HOME/.local/share/icons/Desk"
 apps="$theme/scalable/apps"
 scheme="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
 

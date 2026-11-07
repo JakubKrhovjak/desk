@@ -1,6 +1,6 @@
 [Icon Theme]
-Name=Simpleton
-Comment=Monochrome app and folder icons, the rest comes from desk/build-icon-theme.sh
+Name=Desk
+Comment=Simpleton app and folder icons for desk (own name, so Plasma keeps its plain Simpleton), the rest comes from desk/build-icon-theme.sh
 Inherits=hicolor
 Directories=scalable/apps,scalable/preferences,scalable/places
 

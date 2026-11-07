@@ -1,19 +1,19 @@
 #!/bin/bash
-# Doplní motiv Simpleton o ikony, které nekreslí sám (akce, typy souborů, zařízení, stav), kopií z balíčku papirus-icon-theme.
+# Doplní motiv ikon Desk (ikony Simpletonu) o ikony, které nekreslí sám (akce, typy souborů, zařízení, stav), kopií z balíčku papirus-icon-theme.
 # Motiv pak nezávisí ani na Papirusu, ani na Breeze. Vlastní ikony Simpletonu mají přednost, opakované spuštění je bezpečné.
 # Použití: build-icon-theme.sh [cílový adresář motivu]
 set -euo pipefail
 
 desk_dir=$(dirname "$(realpath "$0")")
-theme=${1:-$HOME/.local/share/icons/Simpleton}
-index_source="$desk_dir/icon-theme/Simpleton/index.theme"
+theme=${1:-$HOME/.local/share/icons/Desk}
+index_source="$desk_dir/icon-theme/Desk/index.theme"
 papirus=/usr/share/icons/Papirus
 papirus_dark=/usr/share/icons/Papirus-Dark
 sizes=(16 22 24 32 48 64)
 contexts=(actions devices emblems mimetypes places status)
 
 [ -d "$papirus_dark" ] && [ -d "$papirus" ] || { echo "Chybí balíček papirus-icon-theme" >&2; exit 1; }
-[ -d "$theme/scalable" ] || { echo "V $theme chybí scalable/, nejdřív zkopíruj desk/icon-theme/Simpleton" >&2; exit 1; }
+[ -d "$theme/scalable" ] || { echo "V $theme chybí scalable/, nejdřív zkopíruj desk/icon-theme/Desk" >&2; exit 1; }
 
 # Co Simpleton kreslí sám, se nekopíruje, jinak by Papirus v přesné velikosti vyhrál nad škálovatelnou ikonou
 own_names=$(mktemp)
@@ -52,4 +52,4 @@ copied=$(cd "$theme" && find . -name '*.svg' ! -path './scalable/*' -printf '%h\
 } > "$theme/index.theme"
 
 gtk-update-icon-cache -f -q -t "$theme" 2>/dev/null || true
-echo "Simpleton: $(find "$theme" -type f -name '*.svg' | wc -l) souborů, $(find "$theme" -type l | wc -l) odkazů, $(du -sh "$theme" | cut -f1)"
+echo "Desk: $(find "$theme" -type f -name '*.svg' | wc -l) souborů, $(find "$theme" -type l | wc -l) odkazů, $(du -sh "$theme" | cut -f1)"

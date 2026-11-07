@@ -7,7 +7,7 @@ config_dir="${XDG_CONFIG_HOME:-$HOME/.config}"
 scheme="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
 target="$config_dir/qt6ct"
 colours="$target/colors/caelestia.conf"
-icon_theme=$(jq -r '.theme.iconTheme // "Simpleton"' "$config_dir/caelestia/cli.json" 2>/dev/null || echo Simpleton)
+icon_theme=$(jq -r '.theme.iconTheme // "Desk"' "$config_dir/caelestia/cli.json" 2>/dev/null || echo Desk)
 
 # Pořadí rolí palety určuje qt6ct: WindowText, Button, Light, Midlight, Dark, Mid, Text, BrightText, ButtonText, Base, Window,
 # Shadow, Highlight, HighlightedText, Link, LinkVisited, AlternateBase, NoRole, ToolTipBase, ToolTipText, PlaceholderText

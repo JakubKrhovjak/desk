@@ -56,9 +56,19 @@ setup_exclude() {
 
 # Živá kopie se přebarvuje podle schématu (recolor-icons.sh), proto mimo git; existující soubory se nepřepisují
 setup_icons() {
-    say "Motiv ikon Simpleton"
-    mkdir -p "$HOME/.local/share/icons"
-    rsync -a --ignore-existing "$desk_dir/icon-theme/Simpleton" "$HOME/.local/share/icons/"
+    say "Motiv ikon Desk"
+    local icons="$HOME/.local/share/icons"
+    mkdir -p "$icons"
+    # Dřív se motiv jmenoval Simpleton a míchal se do Plasmy se stejnojmenným motivem z instalace Archu; přesune se jednou
+    if [ ! -e "$icons/Desk" ] && grep -qs 'desk/build-icon-theme.sh' "$icons/Simpleton/index.theme"; then
+        mv "$icons/Simpleton" "$icons/Desk"
+        sed -i 's/^Name=Simpleton$/Name=Desk/' "$icons/Desk/index.theme"
+    fi
+    local cli="$config_dir/caelestia/cli.json"
+    if [ "$(jq -r '.theme.iconTheme // empty' "$cli" 2>/dev/null)" = Simpleton ]; then
+        jq '.theme.iconTheme = "Desk"' "$cli" > "$cli.tmp" && mv "$cli.tmp" "$cli"
+    fi
+    rsync -a --ignore-existing "$desk_dir/icon-theme/Desk" "$icons/"
     "$desk_dir/build-icon-theme.sh"
 }
 

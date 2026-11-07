@@ -14,7 +14,7 @@ There are two copies. The deployed one has `~/.config` as its work tree (git dir
 | `quickshell/desk/` | The shell: panel and `shell.qml` |
 | `quickshell/caelestia/` | Submodule with the patched Caelestia copy |
 | `ghostty/config` | Terminal config |
-| `desk/icon-theme/Simpleton/` | Source of the icon theme. `install.sh` copies it to `~/.local/share/icons`, where `recolor-icons.sh` recolours it to match the colour scheme. Add new icons here too. |
+| `desk/icon-theme/Desk/` | Source of the icon theme Desk (Simpleton icons under its own name, so Plasma keeps its plain Simpleton). `install.sh` copies it to `~/.local/share/icons`, where `recolor-icons.sh` recolours it to match the colour scheme. Add new icons here too. |
 
 Personal settings live outside git, in `~/.local/state/desk`: panel size and opacity, monitor layout, autostart, keyboard and mouse, panel pins and order, Night Shift and window positions. Defaults for a fresh install are in `desk/defaults/state`, and `start.sh` copies the missing ones at every login. They have no backup.
 
