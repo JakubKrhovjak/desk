@@ -109,8 +109,8 @@ hl.bind("mouse:273", function()
     local pos = hl.get_cursor_pos()
     local win = pos and bar_window_at(pos)
     if win then
-        local address = win.address:gsub("^0x", "")
-        hl.exec_cmd(string.format(config.shell_ipc("windowmenu open 0x%s %d %d %s"), address, math.floor(pos.x), math.floor(pos.y), tostring(win.pinned)))
+        -- Tvar adresy sjednocuje HyprWindows.address v shellu
+        hl.exec_cmd(string.format(config.shell_ipc("windowmenu open %s %d %d %s"), win.address, math.floor(pos.x), math.floor(pos.y), tostring(win.pinned)))
     end
 end, { non_consuming = true })
 
