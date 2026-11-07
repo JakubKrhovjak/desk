@@ -8,4 +8,5 @@ pid=$(pgrep -x qs -a | awk '/qs -c desk/ { print $1 }')
 [[ -n $pid ]] && kill "$pid"
 while [[ -n $pid ]] && kill -0 "$pid" 2>/dev/null; do sleep 0.1; done
 
-hyprctl eval 'hl.exec_cmd("qs -c desk -n -d")' >/dev/null
+# Běžící shell-watch.sh shell spustí sám; bez něj (vypnul se po opakovaných pádech) se spustí tady
+pgrep -x shell-watch.sh >/dev/null || hyprctl eval 'hl.exec_cmd(os.getenv("DESK_DIR") .. "/shell-watch.sh")' >/dev/null

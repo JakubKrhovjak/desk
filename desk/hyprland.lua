@@ -123,7 +123,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
     hl.exec_cmd(config.dir .. "/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
     hl.exec_cmd(config.dir .. "/qt-theme.sh")
-    hl.exec_cmd("qs -c desk -n -d")
+    hl.exec_cmd(config.dir .. "/shell-watch.sh")
 
     -- Při zkoušení v okně uvnitř Plasmy (DESK_NESTED=1) se systémové služby nespouští
     if os.getenv("DESK_NESTED") then return end
