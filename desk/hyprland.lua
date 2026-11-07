@@ -29,7 +29,7 @@ hl.workspace_rule({ workspace = "1", monitor = config.monitors.main, default = t
 hl.workspace_rule({ workspace = "2", monitor = config.monitors.side, default = true, persistent = true })
 
 -- Prostředí aplikací
-hl.env("QT_QPA_PLATFORMTHEME", "qtengine")
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
 hl.env("QT_AUTO_SCREEN_SCALE_FACTOR", "1")
 hl.env("XCURSOR_THEME", cursor_theme)
@@ -122,6 +122,7 @@ require("keyboard")
 hl.on("hyprland.start", function()
     hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " " .. cursor_size)
     hl.exec_cmd(config.dir .. "/recolor-icons.sh") -- schéma se mohlo změnit v jiném prostředí
+    hl.exec_cmd(config.dir .. "/qt-theme.sh")
     hl.exec_cmd("qs -c desk -n -d")
 
     -- Při zkoušení v okně uvnitř Plasmy (DESK_NESTED=1) se systémové služby nespouští

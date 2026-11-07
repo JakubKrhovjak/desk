@@ -69,7 +69,10 @@ ShellRoot {
     FileView {
         path: `${Paths.state}/scheme.json`
         watchChanges: true
-        onFileChanged: Quickshell.execDetached([`${ShellEnv.deskDir}/recolor-icons.sh`])
+        onFileChanged: {
+            Quickshell.execDetached([`${ShellEnv.deskDir}/recolor-icons.sh`]);
+            Quickshell.execDetached([`${ShellEnv.deskDir}/qt-theme.sh`]);
+        }
     }
 
     Binding {

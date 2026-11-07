@@ -1,7 +1,8 @@
 {
-    "theme": {
-        "enableTerm": false,
-        "enableChromium": false,
-        "iconTheme": "Simpleton"
-    }
+  "theme": {
+    "enableTerm": false,
+    "enableChromium": false,
+    "iconTheme": "Simpleton",
+    "enableQt": false
+  }
 }

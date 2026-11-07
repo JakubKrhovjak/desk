@@ -8,7 +8,7 @@ desk_dir=$(dirname "$(realpath "$0")")
 config_dir=$(dirname "$desk_dir")
 caelestia_dir="$config_dir/quickshell/caelestia"
 desk_git_dir="$HOME/.local/share/desk.git"
-packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf papirus-icon-theme qtengine darkly-bin adw-gtk-theme)
+packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf papirus-icon-theme qt6ct adw-gtk-theme)
 
 say() { printf '==> %s\n' "$*"; }
 
@@ -73,6 +73,12 @@ setup_files() {
     xdg-mime default caelestia-files.desktop inode/directory
 }
 
+# Vzhled aplikací v Qt potřebuje schéma, proto až po setup_scheme
+setup_qt() {
+    say "Vzhled aplikací v Qt"
+    "$desk_dir/qt-theme.sh" || say "Vzhled Qt se nepodařilo nastavit, později stačí spustit desk/qt-theme.sh"
+}
+
 # Mapa kláves, se kterou počítá keyd-mode.sh; v IDE se vybírá ručně, existující soubor se nepřepisuje
 setup_idea() {
     say "Mapa kláves macOS Cmd pro IntelliJ"
@@ -118,6 +124,7 @@ setup_defaults
 setup_icons
 setup_wallpapers
 setup_scheme
+setup_qt
 setup_files
 setup_idea
 setup_user
