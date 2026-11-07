@@ -30,7 +30,7 @@
             ]
         },
         "idle": {
-            "lockBeforeSleep": false,
+            "lockBeforeSleep": true,
             "timeouts": [
                 {
                     "enabled": true,
