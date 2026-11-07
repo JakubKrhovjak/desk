@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Wayland
 import Caelestia.Config
+import Caelestia.I18n
 import qs.components
 import qs.components.containers
 import qs.services
@@ -225,7 +226,8 @@ StyledWindow {
 
                         StyledText {
                             anchors.horizontalCenter: parent.horizontalCenter
-                            text: Time.format("HH:mm")
+                            // Formát podle Nastavení → Language & region → Clock format
+                            text: Time.format(Units.twelveHourClock ? "h:mm AP" : "HH:mm")
                             font: Tokens.font.body.medium
                             color: Colours.palette.m3tertiary
                         }
@@ -240,9 +242,13 @@ StyledWindow {
                         }
                     }
 
-                    // Hodiny nemají tlačítko, kurzor aspoň napoví, že jdou přetáhnout
+                    // Klik otevře nastavení data a času; tah myší dál přesouvá hodiny v panelu (SortableRow)
                     HoverHandler {
-                        cursorShape: Qt.OpenHandCursor
+                        cursorShape: Qt.PointingHandCursor
+                    }
+
+                    TapHandler {
+                        onTapped: WindowFactory.openPage("language")
                     }
                 }
 
