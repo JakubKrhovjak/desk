@@ -38,7 +38,8 @@ local home_places = {
             return win.class == config.classes.idea and (win.title:find(" – ", 1, true) or win.title == "Welcome to IntelliJ IDEA")
         end,
         monitor = config.monitors.main,
-        rect = maximized_rect,
+        -- Volající předává i okno, maximized_rect by ho vzal za svůj parametr top
+        rect = function(mon) return maximized_rect(mon) end,
         rule = { match = { class = config.exact_match(config.classes.idea) } },
     },
     half_of_side_monitor(terminal_class, "initial_title", "Ghostty", "right"),
