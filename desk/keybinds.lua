@@ -65,6 +65,10 @@ hl.bind("code:202", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
 
 -- Systémové zkratky jako na Macu: Cmd + mezerník otevře nabídku, Cmd + M a Cmd + H schovají okno
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd(config.shell_ipc("launcher toggle")))
+-- Přehled oken jako Mission Control (panel/Overview.qml), historie schránky a emoji jako na Macu (Ctrl + Cmd + mezerník)
+hl.bind("SUPER + TAB", hl.dsp.exec_cmd(config.shell_ipc("overview toggle")))
+hl.bind("SUPER + V", hl.dsp.exec_cmd("caelestia clipboard"))
+hl.bind("CTRL + SUPER + SPACE", hl.dsp.exec_cmd("caelestia emoji --picker"))
 hl.bind("SUPER + M", function() minimize_active() end)
 hl.bind("SUPER + H", function() minimize_active() end)
 

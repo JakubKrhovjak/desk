@@ -173,6 +173,9 @@ ShellRoot {
         ignoredClasses: ["jetbrains-toolbox"]
         minimizedWorkspace: ShellEnv.minimizedWorkspace
     }
+    Overview {
+        ignoredClasses: ["jetbrains-toolbox"]
+    }
     IdleMonitors {
         lock: lock
     }
