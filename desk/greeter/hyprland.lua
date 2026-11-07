@@ -11,6 +11,7 @@ hl.config({
         kb_layout = "us",
         repeat_delay = 250,
         repeat_rate = 35,
+        numlock_by_default = true,
     },
     misc = {
         disable_hyprland_logo = true,

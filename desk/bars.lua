@@ -22,12 +22,32 @@ hl.window_rule({
     ["hyprbars:title_color"] = "rgb(" .. scheme.onPrimary .. ")",
 })
 
+local function bar_color(percent)
+    return string.format("rgba(%s%02x)", scheme.secondaryContainer, math.floor(percent * 2.55 + 0.5))
+end
+
+-- Krytí zapisuje shell do panel-settings.json i se spojením s panelem už vyřešeným
+local function saved_opacity()
+    local file = io.open(config.dir .. "/panel-settings.json", "r")
+    if not file then
+        return 50
+    end
+    local text = file:read("a")
+    file:close()
+    return tonumber(text:match('"windowBarOpacity"%s*:%s*(%d+)')) or 50
+end
+
+-- Volá shell přes hyprctl eval při změně v Nastavení
+function window_bar_opacity(percent)
+    hl.config({ plugin = { hyprbars = { bar_color = bar_color(percent) } } })
+end
+
 hl.config({
     plugin = {
         hyprbars = {
             bar_height = bars.height,
-            -- Stejná barva a rozmazání jako panel (panel/PanelStyle.qml), krytí vlastní: 66 = 40 %
-            bar_color = "rgba(" .. scheme.secondaryContainer .. "66)",
+            -- Stejná barva a rozmazání jako panel (panel/PanelStyle.qml)
+            bar_color = bar_color(saved_opacity()),
             bar_blur = true,
             ["col.text"] = "rgb(" .. scheme.onSurface .. ")",
             bar_text_size = 11,

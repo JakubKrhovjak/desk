@@ -9,6 +9,8 @@ window-padding-y = 2
 background = #161a1f
 background-opacity = 1
 background-blur = false
+# Krytí nastavuje stránka Panels v Nastavení, soubor zapisuje desk/ghostty-opacity.sh
+config-file = ?opacity
 foreground = #e1e5ef
 selection-background = #303c4c
 selection-foreground = #e1e5ef

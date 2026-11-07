@@ -76,6 +76,7 @@ hl.config({
         kb_options = "", -- rozložení přepíná Command + ťuknutí na Shift, viz keybinds.lua
         repeat_delay = 250,
         repeat_rate = 35,
+        numlock_by_default = true,
         follow_mouse = 2, -- fokus až po kliknutí, jako v Plasmě
     },
     cursor = {
@@ -98,7 +99,7 @@ hl.config({
 
 -- Průhledný shell s rozostřením; okna aplikací průhledná nejsou
 hl.layer_rule({ match = { namespace = "caelestia-desk-overlay" }, blur = true, ignore_alpha = 0.3 })
-hl.layer_rule({ match = { namespace = "caelestia-desk-panel" }, blur = true, ignore_alpha = 0.2 }) -- pod panelOpacity v panel/PanelStyle.qml
+hl.layer_rule({ match = { namespace = "caelestia-desk-panel" }, blur = true, ignore_alpha = 0.2 }) -- pod minPanelOpacity v DeskPanelSettings.qml
 
 -- Všechna okna plovoucí, jako v Plasmě
 hl.window_rule({ match = { class = ".*" }, float = true })
