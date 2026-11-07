@@ -9,6 +9,7 @@ local fallback = {
     onSurfaceVariant = "a7abb4",
     surfaceContainer = "161a1f",
     surfaceContainerHighest = "21262d",
+    secondaryContainer = "303c4c",
 }
 
 local loaded, scheme = pcall(require, "scheme.current")

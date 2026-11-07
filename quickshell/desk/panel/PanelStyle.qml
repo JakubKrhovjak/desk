@@ -9,12 +9,12 @@ Singleton {
     // Krytí bublin, leží přes okna a musí zůstat čitelné
     readonly property real surfaceOpacity: 0.78
     readonly property color surface: translucent(surfaceOpacity)
-    // Krytí panelu, pod ním je jen tapeta. Musí být nad ignore_alpha jeho pravidla v hyprland.lua, jinak zmizí rozmazání.
-    // Stejné krytí mají titulkové lišty oken (bar_color v bars.lua).
-    readonly property real panelOpacity: 0.25
-    readonly property color panelSurface: translucent(panelOpacity)
+    // Krytí panelu nastavuje stránka Panels v Nexusu.
+    // Titulkové lišty oken mají stejnou barvu, ale vlastní krytí (bar_color v bars.lua).
+    readonly property real panelOpacity: DeskPanelSettings.panelOpacity / 100
+    readonly property color panelSurface: translucent(panelOpacity, Colours.palette.m3secondaryContainer)
 
-    function translucent(opacity: real): color {
-        return Colours.tPalette.m3surface.a < 1 ? Qt.alpha(Colours.palette.m3surface, opacity) : Colours.palette.m3surface;
+    function translucent(opacity: real, base = Colours.palette.m3surface): color {
+        return Colours.tPalette.m3surface.a < 1 ? Qt.alpha(base, opacity) : base;
     }
 }

@@ -26,8 +26,8 @@ hl.config({
     plugin = {
         hyprbars = {
             bar_height = bars.height,
-            -- Stejná barva, krytí a rozmazání jako panel: 40 = panelOpacity 0,25 v panel/PanelStyle.qml
-            bar_color = "rgba(" .. scheme.surface .. "40)",
+            -- Stejná barva a rozmazání jako panel (panel/PanelStyle.qml), krytí vlastní: 66 = 40 %
+            bar_color = "rgba(" .. scheme.secondaryContainer .. "66)",
             bar_blur = true,
             ["col.text"] = "rgb(" .. scheme.onSurface .. ")",
             bar_text_size = 11,
