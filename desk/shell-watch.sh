@@ -4,6 +4,9 @@
 # (misc.allow_session_lock_restore v hyprland.lua). Zastaví se po pěti rychlých koncích za sebou.
 quick_exits=0
 
+# Oznámení obstarává právě shell; když neběží, notify-send by čekal navždy, proto na pozadí s časovým limitem
+warn() { timeout 5 notify-send -u critical "Desk" "$1" & }
+
 is_locked() { [[ $(hyprctl -j locked 2>/dev/null | jq -r .locked) == true ]]; }
 
 relock() {
@@ -22,11 +25,11 @@ while hyprctl version >/dev/null 2>&1; do
     started=$SECONDS
     qs -c desk -n &
     shell=$!
-    $was_locked && { relock || notify-send -u critical "Desk" "Zámek se po pádu shellu nepodařilo obnovit"; }
+    $was_locked && { relock || warn "Zámek se po pádu shellu nepodařilo obnovit"; }
     wait "$shell"
     (( SECONDS - started < 10 )) && (( quick_exits += 1 )) || quick_exits=0
     if (( quick_exits >= 5 )); then
-        notify-send -u critical "Desk" "Shell opakovaně padá, automatické spouštění je vypnuté. Log: qs -c desk log"
+        warn "Shell opakovaně padá, automatické spouštění je vypnuté. Log: qs -c desk log, znovu: desk/restart-shell.sh"
         exit 1
     fi
     sleep 1
