@@ -97,7 +97,7 @@ hl.config({
     },
 })
 
--- Průhledný shell s rozostřením; okna aplikací průhledná nejsou
+-- Průhledný shell s rozostřením; z oken aplikací může být průhledný jen Ghostty, ten si krytí řídí sám
 hl.layer_rule({ match = { namespace = "caelestia-desk-overlay" }, blur = true, ignore_alpha = 0.3 })
 hl.layer_rule({ match = { namespace = "caelestia-desk-panel" }, blur = true, ignore_alpha = 0.2 }) -- pod minPanelOpacity v DeskPanelSettings.qml
 
