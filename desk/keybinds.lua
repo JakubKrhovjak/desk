@@ -116,5 +116,25 @@ for _, keys in ipairs({ "Print", "SHIFT + Print", "CTRL + SHIFT + code:13", "SUP
     hl.bind(keys, hl.dsp.exec_cmd(config.shell_ipc("picker openFreezeClip")))
 end
 
+-- Multimediální klávesy: fungují i na zamčené obrazovce, hlasitost a jas se při držení opakují
+local volume_step = "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ "
+local media_keys = {
+    { "XF86AudioRaiseVolume", hl.dsp.exec_cmd(volume_step .. "5%+"), true },
+    { "XF86AudioLowerVolume", hl.dsp.exec_cmd(volume_step .. "5%-"), true },
+    { "XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle") },
+    { "XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle") },
+    { "XF86MonBrightnessUp", hl.dsp.global("caelestia:brightnessUp"), true },
+    { "XF86MonBrightnessDown", hl.dsp.global("caelestia:brightnessDown"), true },
+    { "XF86AudioPlay", hl.dsp.global("caelestia:mediaToggle") },
+    { "XF86AudioPause", hl.dsp.global("caelestia:mediaToggle") },
+    { "XF86AudioNext", hl.dsp.global("caelestia:mediaNext") },
+    { "XF86AudioPrev", hl.dsp.global("caelestia:mediaPrev") },
+    { "XF86AudioStop", hl.dsp.global("caelestia:mediaStop") },
+}
+
+for _, key in ipairs(media_keys) do
+    hl.bind(key[1], key[2], { locked = true, repeating = key[3] or false })
+end
+
 -- Přesun okna: tažení za titulkovou lištu nebo Super + klik kamkoli do okna (změna velikosti jde tažením za okraj)
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
