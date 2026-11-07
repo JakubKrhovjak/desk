@@ -40,7 +40,10 @@ commit_repo() { # $1 = popis, $2 = důvod, zbytek = příkaz gitu; změny už mu
         return 1
     fi
 
-    "$@" commit -q -m "Snapshot $(date '+%Y-%m-%d %H:%M') ($reason)" || { warn "$label: commit selhal"; return 1; }
+    # Čistá instalace identitu gitu nemá, záložní bod před aktualizací na ní nesmí záviset
+    local identity=()
+    "$@" var GIT_COMMITTER_IDENT >/dev/null 2>&1 || identity=(-c "user.name=$USER" -c "user.email=$USER@$(uname -n)")
+    "$@" "${identity[@]}" commit -q -m "Snapshot $(date '+%Y-%m-%d %H:%M') ($reason)" || { warn "$label: commit selhal"; return 1; }
     say "$label: uložen nový stav"
 }
 
