@@ -13,6 +13,16 @@ for file in "$source_dir"/*; do
     fi
 done
 
+# Konfigurace, které z repozitáře zmizely, by v /etc/keyd zůstaly a chytaly stejné klávesnice; zálohy *.bak* zůstávají
+stale=()
+for file in "$target_dir"/*.conf; do
+    [[ -e $file && ! -e "$source_dir/$(basename "$file")" ]] && stale+=("$file")
+done
+if (( ${#stale[@]} )); then
+    echo "navíc v $target_dir: ${stale[*]##*/}"
+    different=true
+fi
+
 if [[ $different == false ]]; then
     echo "konfigurace keyd je aktuální"
     exit 0
@@ -22,6 +32,7 @@ sudo install -d "$target_dir"
 for file in "$source_dir"/*; do
     sudo install -m644 "$file" "$target_dir/"
 done
+(( ${#stale[@]} )) && sudo rm -f -- "${stale[@]}"
 sudo keyd check
 # keyd reload může spadnout a smazat vazby, proto restart a nové nastavení režimu
 sudo systemctl restart keyd
