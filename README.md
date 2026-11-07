@@ -6,7 +6,7 @@ This is my own setup, shaped around my monitors and keyboards. It has no stable 
 
 ## Layout
 
-The repository's work tree is `~/.config`, and only the paths listed in `desk_paths` in `desk/desk-update.sh` are ever committed.
+There are two copies. The deployed one has `~/.config` as its work tree (git dir `~/.local/share/desk.git`), because Hyprland and Quickshell read their config from there; a fresh install clones it straight from GitHub. Only the paths in `desk_paths` in `desk/desk-update.sh` belong to it, and it is never edited by hand. Development happens in an ordinary clone in `~/projects/desk`: commit there, then `desk-deploy` pulls the commits into `~/.config` (no push needed), reloads Hyprland and restarts the shell. Push to GitHub when the change is good.
 
 | Path | Purpose |
 | --- | --- |
@@ -16,7 +16,7 @@ The repository's work tree is `~/.config`, and only the paths listed in `desk_pa
 | `ghostty/config` | Terminal config |
 | `desk/icon-theme/Simpleton/` | Source of the icon theme. `install.sh` copies it to `~/.local/share/icons`, where `recolor-icons.sh` recolours it to match the colour scheme. Add new icons here too. |
 
-Panel pins and order, Night Shift settings and window positions live outside git, in `~/.local/state/desk`. They have no backup, so a fresh install starts with defaults.
+Personal settings live outside git, in `~/.local/state/desk`: panel size and opacity, monitor layout, autostart, keyboard and mouse, panel pins and order, Night Shift and window positions. Defaults for a fresh install are in `desk/defaults/state`, and `start.sh` copies the missing ones at every login. They have no backup.
 
 ## Install
 

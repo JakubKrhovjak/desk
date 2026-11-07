@@ -105,9 +105,10 @@ setup_idea() {
 }
 
 setup_user() {
-    say "Příkaz desk-update"
+    say "Příkazy desk-update a desk-deploy"
     mkdir -p "$HOME/.local/bin"
     ln -sfn "$desk_dir/desk-update.sh" "$HOME/.local/bin/desk-update"
+    ln -sfn "$desk_dir/desk-deploy.sh" "$HOME/.local/bin/desk-deploy"
     if [ -x "$desk_dir/plugins/hyprbars.so" ]; then
         say "hyprbars už je zkompilovaný"
     else
