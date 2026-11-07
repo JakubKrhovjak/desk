@@ -1,6 +1,5 @@
 #!/bin/bash
 # Obnoví konfiguraci keyd z kopie v repozitáři, třeba po přeinstalaci systému. Bez rozdílů nic nedělá.
-# HP 720 sama posílá Alt a Win prohozené, proto je aliasy v hp720.conf opravdu potřebuje.
 set -euo pipefail
 
 source_dir=$(dirname "$(realpath "$0")")/keyd

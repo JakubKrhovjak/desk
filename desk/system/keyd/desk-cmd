@@ -1,3 +1,13 @@
+# Super + F1 až F6 přepíná terminály (Hyprland běží na tty1). Levý Alt je Command, takže Ctrl + Alt + F3 neexistuje.
+# Spouští to přímo keyd, aby přepnutí fungovalo i při zamrzlém Hyprlandu. Platí ve všech režimech i v Plasmě.
+[meta]
+f1 = command(/usr/bin/chvt 1)
+f2 = command(/usr/bin/chvt 2)
+f3 = command(/usr/bin/chvt 3)
+f4 = command(/usr/bin/chvt 4)
+f5 = command(/usr/bin/chvt 5)
+f6 = command(/usr/bin/chvt 6)
+
 # Vrstva klávesy Command pro prostředí desk (levý Alt, jako na Macu vedle mezerníku): drží jako Ctrl, výjimky níže.
 # Na fyzickou klávesu ji napojí až ~/.config/desk/keyd-mode.sh, v Plasmě a Caelestii se nepoužívá.
 [cmd:C]
