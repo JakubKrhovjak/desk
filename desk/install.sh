@@ -25,7 +25,11 @@ check_packages() {
 # Nastavení mimo repozitář (shell, Qt, GTK): výchozí hodnoty jen na čistém systému, existující soubory se nepřepisují
 setup_defaults() {
     say "Výchozí nastavení shellu a vzhledu"
-    rsync -a --ignore-existing "$desk_dir/defaults/" "$config_dir/"
+    rsync -a --ignore-existing --exclude /state/ "$desk_dir/defaults/" "$config_dir/"
+    # Osobní nastavení desku (panel, monitory, autostart, myš) je mimo git; start.sh doplňuje totéž při každém startu
+    local state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/desk"
+    mkdir -p "$state_dir"
+    rsync -a --ignore-existing "$desk_dir/defaults/state/" "$state_dir/"
 }
 
 # Schéma Simpleton a tapeta; bez něj by Hyprland zůstal na záložních barvách z colours.lua

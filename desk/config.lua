@@ -1,10 +1,13 @@
 -- Společné nastavení prostředí desk: co se může změnit nebo používá víc souborů, patří sem.
 local home = os.getenv("HOME")
 local xdg_state = os.getenv("XDG_STATE_HOME")
+-- Osobní nastavení mimo git (stránky Nastavení zapisují sem); výchozí hodnoty jsou v desk/defaults/state, doplňuje je start.sh.
+-- Výchozí kopie pro běh mimo session jsou v nightshift.sh a ShellEnv.qml
+local state_dir = (xdg_state and xdg_state ~= "" and xdg_state or home .. "/.local/state") .. "/desk"
 
--- Soubor se přepisuje za běhu a je ve verzovacím systému; chyba v něm nesmí vzít přihlášení, jako u colours.lua
+-- Soubor generuje stránka Displays; chyba v něm nesmí vzít přihlášení, jako u colours.lua
 local function load_monitors()
-    local loaded, monitors = pcall(require, "monitor-settings")
+    local loaded, monitors = pcall(dofile, state_dir .. "/monitor-settings.lua")
     local valid = loaded and type(monitors) == "table" and type(monitors.main) == "string"
         and type(monitors.side) == "string" and type(monitors.outputs) == "table"
     return valid and monitors or { main = "HDMI-A-1", side = "DP-1", outputs = {} }
@@ -41,9 +44,8 @@ end
 local config = {
     dir = home .. "/.config/desk",
 
-    input = load_input(home .. "/.config/desk/input-settings.json"),
-    -- Výchozí kopie pro běh mimo session jsou v nightshift.sh a ShellEnv.qml
-    state_dir = (xdg_state ~= "" and xdg_state or home .. "/.local/state") .. "/desk",
+    state_dir = state_dir,
+    input = load_input(state_dir .. "/input-settings.json"),
 
     -- main je monitor s panelem; hodnoty nastavuje stránka Displays v Nastavení
     monitors = load_monitors(),
@@ -77,9 +79,9 @@ function config.clamp_opacity(percent)
     return math.max(25, math.min(100, percent))
 end
 
--- Krytí ze stránky Panels (services/DeskPanelSettings.qml zapisuje desk/panel-settings.json)
+-- Krytí ze stránky Panels (services/DeskPanelSettings.qml zapisuje panel-settings.json ve stavové složce)
 function config.saved_opacity(key, default)
-    local file = io.open(config.dir .. "/panel-settings.json", "r")
+    local file = io.open(config.state_dir .. "/panel-settings.json", "r")
     if not file then
         return default
     end

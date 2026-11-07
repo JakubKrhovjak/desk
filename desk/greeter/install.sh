@@ -18,7 +18,7 @@ wallpaper=$(cat "$state_dir/wallpaper/path.txt" 2>/dev/null || true)
 session="$HOME/arch-setup/desk-session.sh"
 [ -x "$session" ] || session="$desk_dir/start.sh"
 
-main=$(sed -n -E 's/^\s*main = "([^"]+)".*/\1/p' "$desk_dir/monitor-settings.lua" 2>/dev/null | head -n 1 || true)
+main=$(sed -n -E 's/^\s*main = "([^"]+)".*/\1/p' "${XDG_STATE_HOME:-$HOME/.local/state}/desk/monitor-settings.lua" 2>/dev/null | head -n 1 || true)
 
 settings=$(mktemp)
 trap 'rm -f "$settings"' EXIT

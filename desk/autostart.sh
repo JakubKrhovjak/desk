@@ -3,7 +3,10 @@
 # Spouští se až po startu shellu, protože ikonu v trayi registrují u jeho StatusNotifierWatcheru
 # a například Toolbox to později už nezkusí znovu.
 
-config=${1:-$(dirname "$(realpath "$0")")/autostart.json}
+# Seznam je osobní nastavení ve stavové složce; dokud ho start.sh nedoplnil, platí výchozí z repozitáře
+state="${DESK_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/desk}/autostart.json"
+[ -f "$state" ] || state="$(dirname "$(realpath "$0")")/defaults/state/autostart.json"
+config=${1:-$state}
 
 attempts=0
 while [ "$attempts" -lt 60 ] && ! busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; do
