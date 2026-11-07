@@ -13,6 +13,7 @@ import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.nexus
 import qs.modules.notifications as Notifications
+import qs.modules.osd as Osd
 import qs.modules.session as Session
 import qs.modules.sidebar as Sidebar
 import qs.modules.utilities as Utilities
@@ -60,6 +61,7 @@ StyledWindow {
         Region { item: launcherCatcher.visible ? launcherCatcher : null }
         Region { item: popoutBg.visible ? popoutBg : null }
         Region { item: notifsBg.visible ? notifsBg : null }
+        Region { item: osdBg.visible ? osdBg : null }
         Region { item: sessionBg.visible ? sessionBg : null }
         Region { item: sidebarBg.visible ? sidebarBg : null }
         // Nad hrou na celou obrazovku by pruh bral myš aplikaci
@@ -331,7 +333,7 @@ StyledWindow {
         visible: height > 0
         screenState: root.screenState
         sidebarPanel: sidebar
-        osdPanel: absentPanel
+        osdPanel: osdWrapper
         sessionPanel: session
         utilitiesPanel: utilities
 
@@ -339,8 +341,34 @@ StyledWindow {
         anchors.right: parent.right
     }
 
+    // Ukazatel hlasitosti a jasu: při změně vyjede zprava a sám se schová
+    Bubble {
+        id: osdBg
+
+        target: osdWrapper
+        topLeftRadius: Tokens.rounding.extraLarge
+        bottomLeftRadius: Tokens.rounding.extraLarge
+    }
+
     Item {
-        id: absentPanel
+        id: osdWrapper
+
+        visible: width > 0
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: parent.right
+        implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
+        implicitHeight: osd.implicitHeight
+
+        Osd.Wrapper {
+            id: osd
+
+            screen: root.screen
+            screenState: root.screenState
+            sidebarOrSessionVisible: sidebar.visible || session.visible
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+        }
     }
 
     // Historie notifikací: vyjede zprava po kliknutí na zvonek
