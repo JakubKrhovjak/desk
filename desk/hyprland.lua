@@ -130,6 +130,8 @@ hl.on("hyprland.start", function()
 
     hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
     hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
+    -- Flashky a disky: připojení s oznámením, ikona v tray jen když je co odebrat
+    hl.exec_cmd("udiskie --automount --notify --smart-tray --appindicator")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme " .. cursor_theme)

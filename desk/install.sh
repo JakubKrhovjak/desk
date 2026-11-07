@@ -8,7 +8,7 @@ desk_dir=$(dirname "$(realpath "$0")")
 config_dir=$(dirname "$desk_dir")
 caelestia_dir="$config_dir/quickshell/caelestia"
 desk_git_dir="$HOME/.local/share/desk.git"
-packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf papirus-icon-theme qt6ct adw-gtk-theme papers loupe gnome-text-editor)
+packages=(hyprland hyprsunset caelestia-shell quickshell-git jq rsync keyd ghostty wl-clipboard cliphist bluez-utils gnome-keyring polkit-gnome xorg-xrandr make gcc cmake cpio pkgconf papirus-icon-theme qt6ct adw-gtk-theme papers loupe gnome-text-editor udisks2 udiskie libayatana-appindicator)
 
 say() { printf '==> %s\n' "$*"; }
 
