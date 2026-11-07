@@ -52,7 +52,8 @@
                 {
                     "enabled": true,
                     "idleAction": [
-                        "suspendThenHibernate"
+                        "systemctl",
+                        "suspend"
                     ],
                     "inhibitWhenAudio": false,
                     "inhibitWhenCharging": false,
@@ -75,11 +76,18 @@
     },
     "session": {
         "commands": {
+            "hibernate": [
+                "systemctl",
+                "suspend"
+            ],
             "logout": [
                 "hyprctl",
                 "eval",
                 "hl.dispatch(hl.dsp.exit())"
             ]
+        },
+        "icons": {
+            "hibernate": "bedtime"
         }
     },
     "utilities": {
