@@ -23,7 +23,19 @@ ShellRoot {
     id: root
 
     // Panel a vše k němu patřící jen na hlavním monitoru
-    readonly property string primaryScreen: Screens.screens.some(s => s.name === ShellEnv.mainMonitor) ? ShellEnv.mainMonitor : (Screens.screens[0]?.name ?? "")
+    readonly property bool mainConnected: Screens.screens.some(s => s.name === ShellEnv.mainMonitor)
+    property bool useFallbackScreen: false
+    readonly property string primaryScreen: mainConnected ? ShellEnv.mainMonitor : useFallbackScreen ? (Screens.screens[0]?.name ?? "") : ""
+
+    onMainConnectedChanged: if (mainConnected) useFallbackScreen = false
+
+    // Hlavní monitor se při usnutí a probouzení odpojuje a připojuje. Panel na jiném monitoru by tam zabral místo:
+    // Hyprland okna posune dolů a po návratu panelu je nevrátí. Proto náhradní monitor až po delší době bez zámku.
+    Timer {
+        interval: 10000
+        running: !root.mainConnected && !root.useFallbackScreen && !lock.lock.locked
+        onTriggered: root.useFallbackScreen = true
+    }
 
     settings.watchFiles: false
 
@@ -47,7 +59,11 @@ ShellRoot {
         }
     }
 
-    Component.onCompleted: Quickshell.execDetached([`${ShellEnv.deskDir}/toolbox-tray.sh`])
+    Component.onCompleted: {
+        // Start bez hlavního monitoru, třeba ve virtuálce: není na co čekat
+        useFallbackScreen = !mainConnected;
+        Quickshell.execDetached([`${ShellEnv.deskDir}/toolbox-tray.sh`]);
+    }
 
     // Ikony Simpleton v barvách schématu; nové barvy se v běžícím shellu ukážou až po jeho restartu
     FileView {

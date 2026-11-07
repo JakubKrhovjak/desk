@@ -90,6 +90,10 @@ hl.config({
         middle_click_paste = false,
         background_color = "rgb(" .. scheme.surfaceContainer .. ")",
     },
+    -- Bez okna s novinkami po první přihlášení a po každé aktualizaci Hyprlandu
+    ecosystem = {
+        no_update_news = true,
+    },
 })
 
 -- Průhledný shell s rozostřením; okna aplikací průhledná nejsou

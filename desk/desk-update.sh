@@ -8,6 +8,7 @@
 # Použití: desk-update            celá aktualizace
 #          desk-update --snapshot jen uložení do gitu
 #          desk-update --hyprbars jen kompilace pluginu hyprbars
+#          desk-update --yes      celá aktualizace bez dotazů, pro test ve virtuálce
 set -uo pipefail
 
 desk_git=(git -C "$HOME/.config" --git-dir="$HOME/.local/share/desk.git" --work-tree="$HOME/.config")
@@ -150,7 +151,9 @@ snapshot "before update"
 result=0
 
 say "Spouštím yay -Syu"
-yay -Syu || { warn "aktualizace neproběhla celá, dokončuji zbývající kroky"; result=1; }
+yay_options=()
+[ "${1:-}" = --yes ] && yay_options=(--noconfirm --answerdiff None --answerclean None)
+yay -Syu "${yay_options[@]}" || { warn "aktualizace neproběhla celá, dokončuji zbývající kroky"; result=1; }
 
 hyprbars_is_current || rebuild_hyprbars || result=1
 merge_caelestia || result=1
